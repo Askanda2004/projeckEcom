@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Seller • Order Management</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { primary: { DEFAULT: '#2563eb' } },
+          boxShadow: { soft: '0 8px 30px rgba(0,0,0,0.08)' }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+  <!-- HEADER -->
+  <header class="sticky top-0 z-30 bg-white/90 backdrop-blur shadow-soft">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
+          <svg class="w-5 h-5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="2" d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </div>
+        <span class="font-bold">Seller</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <form method="POST" action="{{ route('logout') }}"> @csrf
+          <button class="px-3 py-1.5 text-sm rounded-lg bg-slate-900 text-white hover:bg-slate-800">Logout</button>
+        </form>
+      </div>
+    </div>
+  </header>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-12 gap-6">
+    <!-- SIDEBAR -->
+    <aside class="col-span-12 md:col-span-3">
+      <div class="bg-white rounded-2xl shadow-soft p-4 md:p-5">
+        <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-3">Menu</h3>
+        <nav class="space-y-1">
+          <a href="{{ route('seller.reports.index') }}" class="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-100 text-slate-900">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+            Analytics & Reports
+          </a>
+          <a href="{{ route('seller.products.index') }}" class="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-100">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M20 6H4v12h16V6zM8 8h8v2H8V8zm0 4h8v2H8v-2z"/></svg>
+            Product Management
+          </a>
+          <a href="{{ route('seller.orders.index') }}" class="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-100">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M3 7l9-4 9 4-9 4-9-4zm0 6l9 4 9-4m-9 4v6"/></svg>
+            Order Management
+          </a>
+        </nav>
+      </div>
+    </aside>
+
+
+    <!-- MAIN -->
+    <main class="col-span-12 md:col-span-9 space-y-6">
+      <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-bold">Order Management</h1>
+
+        <form method="GET" action="{{ route('seller.orders.index') }}" class="relative hidden md:block">
+          <input type="text" name="q" value="{{ $q ?? request('q','') }}" placeholder="ค้นหา: ชื่อ / เบอร์ / ที่อยู่"
+                class="w-72 rounded-full border border-slate-200 py-2.5 pl-4 pr-24 focus:border-primary focus:ring-4 focus:ring-blue-100 transition">
+          <button class="absolute right-1 top-1/2 -translate-y-1/2 rounded-full bg-primary text-white px-4 py-1.5 text-sm">
+            Search
+          </button>
+        </form>
+      </div>
+
+      @if (session('status'))
+        <div class="rounded-xl bg-green-50 text-green-800 px-4 py-3 shadow-soft">{{ session('status') }}</div>
+      @endif
+
+      <div class="bg-white rounded-2xl shadow-soft overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm">
+            <thead class="bg-slate-50 text-slate-600">
+              <tr>
+                <th class="px-4 py-3 text-left  font-semibold border-b">วันที่สั่งซื้อ</th>
+                <th class="px-4 py-3 text-left  font-semibold border-b">ชื่อผู้รับ</th>
+                <th class="px-4 py-3 text-left  font-semibold border-b">เบอร์โทร</th>
+                <th class="px-4 py-3 text-left  font-semibold border-b">ที่อยู่จัดส่ง</th>
+                <th class="px-4 py-3 text-right font-semibold border-b">ยอดรวม</th>
+                <th class="px-4 py-3 text-center font-semibold border-b">สถานะ</th>
+                <th class="px-4 py-3 text-center font-semibold border-b">รายละเอียด</th> {{-- ใหม่ --}}
+              </tr>
+            </thead>
+            <tbody>
+              @forelse ($orders as $o)
+                <tr class="hover:bg-slate-50">
+                  <td class="px-4 py-3 border-b">
+                    {{ \Illuminate\Support\Carbon::parse($o->order_date)->format('d/m/Y H:i') }}
+                  </td>
+                  <td class="px-4 py-3 border-b font-medium">
+                    {{ $o->shipping_name ?? '—' }}
+                  </td>
+                  <td class="px-4 py-3 border-b">
+                    {{ $o->shipping_phone ?? '—' }}
+                  </td>
+                  <td class="px-4 py-3 border-b">
+                    <span title="{{ $o->shipping_address }}">{{ \Illuminate\Support\Str::limit($o->shipping_address, 80) ?: '—' }}</span>
+                  </td>
+                  <td class="px-4 py-3 border-b text-right font-semibold">
+                    ฿{{ number_format((float) $o->total_amount, 2) }}
+                  </td>
+
+                  {{-- สถานะ: dropdown เปลี่ยนสถานะทันที --}}
+                  <td class="px-4 py-3 border-b text-center">
+                    <form method="POST" action="{{ route('seller.orders.status', $o) }}">
+                      @csrf
+                      @method('PATCH')
+                      <select name="status"
+                              class="rounded-lg border px-2 py-1 text-sm focus:border-primary focus:ring-2 focus:ring-blue-100"
+                              onchange="this.form.submit()">
+                        @foreach ($statusMap as $value => $label)
+                          <option value="{{ $value }}" @selected($o->status === $value)>{{ $label }}</option>
+                        @endforeach
+                      </select>
+                    </form>
+                  </td>
+
+                  {{-- รายละเอียด: ปุ่มเปิดโมดัลดูรายการสินค้า --}}
+                  <td class="px-4 py-3 border-b text-center">
+                    <button type="button"
+                            class="rounded-lg border px-3 py-1.5 text-sm hover:bg-slate-50"
+                            onclick="document.getElementById('dlg-{{ $o->order_id }}').showModal()">
+                      รายละเอียด
+                    </button>
+
+                    {{-- โมดัล: ต้องมีความสัมพันธ์ items.product โหลดจาก Controller ด้วย ->with(['items.product']) --}}
+                    <dialog id="dlg-{{ $o->order_id }}" class="rounded-2xl p-0 w-full max-w-2xl">
+                      <form method="dialog">
+                        <div class="p-4 sm:p-6 border-b">
+                          <div class="flex items-center justify-between">
+                            <h3 class="font-semibold">
+                              รายละเอียดคำสั่งซื้อ #{{ $o->order_id }}
+                              <span class="ml-2 text-sm text-slate-500">
+                                ({{ \Illuminate\Support\Carbon::parse($o->order_date)->format('d/m/Y H:i') }})
+                              </span>
+                            </h3>
+                            <button class="rounded-lg border px-3 py-1.5 text-sm hover:bg-slate-50">ปิด</button>
+                          </div>
+                          <div class="mt-1 text-sm text-slate-600">
+                            ผู้รับ: {{ $o->shipping_name ?? '—' }} • {{ $o->shipping_phone ?? '—' }}<br>
+                            ที่อยู่: {{ $o->shipping_address ?? '—' }}
+                          </div>
+                        </div>
+
+                        <div class="p-4 sm:p-6 overflow-x-auto">
+                          <table class="min-w-full text-sm">
+                            <thead class="bg-slate-50">
+                              <tr>
+                                <th class="px-3 py-2 text-left">สินค้า</th>
+                                <th class="px-3 py-2 text-left">ราคา</th>
+                                <th class="px-3 py-2 text-left">จำนวน</th>
+                                <th class="px-3 py-2 text-right">รวม</th>
+                              </tr>
+                            </thead>
+                            <tbody class="divide-y">
+                              @forelse ($o->items ?? [] as $it)
+                                <tr>
+                                  <td class="px-3 py-2">
+                                    <div class="flex items-center gap-3">
+                                      @php
+                                        $thumb = $it->product?->image_url
+                                          ? asset('storage/'.$it->product->image_url)
+                                          : null;
+                                      @endphp
+                                      @if ($thumb)
+                                        <img src="{{ $thumb }}" class="w-10 h-10 rounded object-cover border">
+                                      @else
+                                        <div class="w-10 h-10 rounded bg-slate-100 border"></div>
+                                      @endif
+                                      <div>
+                                        <div class="font-medium">{{ $it->product->name ?? '—' }}</div>
+                                        <div class="text-xs text-slate-500">
+                                          ขนาด: {{ $it->product->size ?? '—' }} • สี: {{ $it->product->color ?? '—' }}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </td>
+                                  <td class="px-3 py-2">฿{{ number_format((float)$it->price, 2) }}</td>
+                                  <td class="px-3 py-2">x{{ $it->quantity }}</td>
+                                  <td class="px-3 py-2 text-right">
+                                    ฿{{ number_format((float)$it->price * (int)$it->quantity, 2) }}
+                                  </td>
+                                </tr>
+                              @empty
+                                <tr>
+                                  <td colspan="4" class="px-3 py-6 text-center text-slate-500">ไม่มีรายการสินค้า</td>
+                                </tr>
+                              @endforelse
+                            </tbody>
+                          </table>
+
+                          <div class="mt-4 text-right">
+                            <div class="text-slate-500 text-sm">ยอดรวม</div>
+                            <div class="text-xl font-bold">฿{{ number_format((float)$o->total_amount, 2) }}</div>
+                          </div>
+                        </div>
+
+                        <div class="p-4 sm:p-6 border-t flex justify-end">
+                          <button class="rounded-lg border px-4 py-2 hover:bg-slate-50">ปิด</button>
+                        </div>
+                      </form>
+                    </dialog>
+                  </td>
+                </tr>
+              @empty
+                <tr>
+                  <td colspan="6" class="px-4 py-8 text-center text-slate-500">No orders found.</td>
+                </tr>
+              @endforelse
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="p-4 sm:p-6 border-t border-slate-100">
+          <div class="flex items-center justify-between">
+            <div class="text-xs text-slate-500">
+              Showing <span class="font-medium">{{ $orders->firstItem() ?? 0 }}</span> to
+              <span class="font-medium">{{ $orders->lastItem() ?? 0 }}</span> of
+              <span class="font-medium">{{ $orders->total() }}</span> results
+            </div>
+            {{ $orders->links() }}
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
