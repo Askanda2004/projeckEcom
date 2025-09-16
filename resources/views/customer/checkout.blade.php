@@ -99,44 +99,96 @@
       @endif
     </section>
 
-    {{-- ฟอร์มที่อยู่จัดส่ง / ยืนยันคำสั่งซื้อ --}}
+    {{-- ฟอร์มที่อยู่จัดส่ง + ชำระเงิน / ยืนยันคำสั่งซื้อ --}}
     <section class="bg-white rounded-2xl shadow-soft border">
       <div class="p-5 border-b">
-        <h2 class="text-base font-semibold">ที่อยู่จัดส่ง</h2>
+        <h2 class="text-base font-semibold">ที่อยู่จัดส่ง & การชำระเงิน</h2>
       </div>
 
-      <form method="POST" action="{{ route('customer.checkout.place') }}" class="p-5 space-y-4">
+      {{-- เพิ่ม enctype เพื่อรองรับการอัปโหลดไฟล์สลิป --}}
+      <form method="POST" action="{{ route('customer.checkout.place') }}" enctype="multipart/form-data" class="p-5 space-y-6">
         @csrf
+        {{-- ส่งยอดรวมไปกับฟอร์ม (ป้องกัน client เปลี่ยนค่านอกระบบ ให้ตรวจซ้ำฝั่งเซิร์ฟเวอร์ด้วย) --}}
+        <input type="hidden" name="order_total" value="{{ $total }}">
 
-        <div>
-          <label class="block text-sm font-medium">ชื่อผู้รับ</label>
-          <input
-            name="shipping_name"
-            value="{{ old('shipping_name', auth()->user()->name ?? '') }}"
-            class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 focus:border-primary focus:ring-2 focus:ring-blue-100"
-            required>
-          @error('shipping_name') <p class="text-sm text-rose-600 mt-1">{{ $message }}</p> @enderror
+        {{-- ที่อยู่จัดส่ง --}}
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium">ชื่อผู้รับ</label>
+            <input
+              name="shipping_name"
+              value="{{ old('shipping_name', auth()->user()->name ?? '') }}"
+              class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 focus:border-primary focus:ring-2 focus:ring-blue-100"
+              required>
+            @error('shipping_name') <p class="text-sm text-rose-600 mt-1">{{ $message }}</p> @enderror
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium">เบอร์โทร</label>
+            <input
+              name="shipping_phone"
+              value="{{ old('shipping_phone') }}"
+              placeholder="0812345678"
+              class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 focus:border-primary focus:ring-2 focus:ring-blue-100"
+              required>
+            @error('shipping_phone') <p class="text-sm text-rose-600 mt-1">{{ $message }}</p> @enderror
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium">ที่อยู่จัดส่ง</label>
+            <textarea
+              name="shipping_address"
+              rows="3"
+              class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 focus:border-primary focus:ring-2 focus:ring-blue-100"
+              required>{{ old('shipping_address') }}</textarea>
+            @error('shipping_address') <p class="text-sm text-rose-600 mt-1">{{ $message }}</p> @enderror
+          </div>
         </div>
 
-        <div>
-          <label class="block text-sm font-medium">เบอร์โทร</label>
-          <input
-            name="shipping_phone"
-            value="{{ old('shipping_phone') }}"
-            placeholder="0812345678"
-            class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 focus:border-primary focus:ring-2 focus:ring-blue-100"
-            required>
-          @error('shipping_phone') <p class="text-sm text-rose-600 mt-1">{{ $message }}</p> @enderror
-        </div>
+        {{-- การชำระเงินด้วยคิวอาร์โค้ด + แนบสลิป --}}
+        <div class="pt-2">
+          <h3 class="text-sm font-semibold mb-3">ชำระเงินด้วยคิวอาร์โค้ด</h3>
 
-        <div>
-          <label class="block text-sm font-medium">ที่อยู่จัดส่ง</label>
-          <textarea
-            name="shipping_address"
-            rows="3"
-            class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 focus:border-primary focus:ring-2 focus:ring-blue-100"
-            required>{{ old('shipping_address') }}</textarea>
-          @error('shipping_address') <p class="text-sm text-rose-600 mt-1">{{ $message }}</p> @enderror
+          <div class="grid sm:grid-cols-2 gap-5">
+            {{-- บัตรคิวอาร์โค้ด / รายละเอียดบัญชี --}}
+            <div class="rounded-2xl border p-4">
+              <div class="flex items-start gap-4">
+                <img
+                  src="{{ asset('storage/payments/qr.jpg') }}"
+                  alt="QR สำหรับชำระเงิน"
+                  class="w-36 h-36 object-contain rounded-lg border bg-white">
+                <div class="text-sm space-y-1">
+                  <div class="font-medium">สแกนชำระยอดรวม</div>
+                  <div class="text-slate-500">จำนวนเงิน: ฿{{ number_format($total, 2) }}</div>
+                  <div class="text-slate-500">คำอธิบาย: ชำระค่าสินค้า</div>
+                  <hr class="my-2">
+                  <div class="text-xs text-slate-500">
+                    * หลังโอนแล้ว กรุณาอัปโหลดสลิปด้านขวาเพื่อตรวจสอบ
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {{-- อัปโหลดสลิป + พรีวิว --}}
+            <div class="rounded-2xl border p-4">
+              <label class="block text-sm font-medium">อัปโหลดสลิปโอน (รูปภาพ)</label>
+              <input
+                id="payment_slip"
+                type="file"
+                name="payment_slip"
+                accept="image/*"
+                class="mt-1 block w-full text-sm file:mr-4 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-primary file:text-white hover:file:bg-blue-700"
+                required>
+              <p class="text-xs text-slate-500 mt-1">รองรับไฟล์: JPG, PNG, JPEG (ขนาดแนะนำ &lt; 5MB)</p>
+              @error('payment_slip') <p class="text-sm text-rose-600 mt-1">{{ $message }}</p> @enderror>
+
+              {{-- พรีวิวรูป --}}
+              <div id="slipPreview" class="mt-3 hidden">
+                <div class="text-xs text-slate-500 mb-1">พรีวิวสลิป:</div>
+                <img id="slipImg" src="#" alt="สลิปชำระเงิน" class="w-full max-h-72 object-contain rounded-lg border bg-slate-50">
+              </div>
+            </div>
+          </div>
         </div>
 
         <label class="inline-flex items-center gap-2 text-sm">
@@ -155,5 +207,29 @@
     </section>
 
   </main>
+
+  {{-- พรีวิวรูปสลิปด้วย JS --}}
+  <script>
+    const input = document.getElementById('payment_slip');
+    const previewWrap = document.getElementById('slipPreview');
+    const img = document.getElementById('slipImg');
+
+    if (input) {
+      input.addEventListener('change', () => {
+        const file = input.files?.[0];
+        if (!file) {
+          previewWrap.classList.add('hidden');
+          img.src = '#';
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = e => {
+          img.src = e.target.result;
+          previewWrap.classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+  </script>
 </body>
 </html>

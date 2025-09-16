@@ -75,9 +75,14 @@ class CheckoutController extends Controller
             'shipping_phone'   => ['required','string','max:30'],
             'shipping_address' => ['required','string','max:2000'],
             'confirm'          => ['required','accepted'],
-        ], [
+            'payment_slip'     => ['required','image','mimes:jpg,jpeg,png','max:5120'], // 5MB
+            ], 
+        
+            [
             'confirm.accepted' => 'กรุณาติ๊กยืนยันการสั่งซื้อ',
         ]);
+        
+        // $path = $request->file('payment_slip')->store('payment_slips', 'public');
 
         $userId = auth()->id();
 

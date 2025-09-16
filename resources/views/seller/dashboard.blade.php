@@ -62,13 +62,13 @@
     </aside>
 
     <!-- Main -->
-    {{-- <main class="col-span-12 md:col-span-9 space-y-6">
+    <main class="col-span-12 md:col-span-9 space-y-6">
       <div class="flex items-center justify-between">
         <h1 class="text-2xl font-bold">Seller Dashboard</h1>
       </div>
 
       
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+      {{-- <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
         
         <div class="bg-white rounded-2xl shadow-soft p-6">
           <div class="flex items-start justify-between">
@@ -117,8 +117,8 @@
           <p class="mt-1 text-sm text-slate-500">New customer inquiries</p>
           <div class="mt-6 h-28 rounded-xl bg-slate-100"></div>
         </div>
-      </div>
-    </main> --}}
+      </div> --}}
+    </main>
   </div>
 
 </body>
