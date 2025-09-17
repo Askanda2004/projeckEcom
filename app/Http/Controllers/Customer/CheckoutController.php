@@ -31,7 +31,7 @@ class CheckoutController extends Controller
                 'cart_items.size',
                 'cart_items.color',
                 'cart_items.image_url',
-                'products.name as product_name',
+                'products.name as product_name', // ✅ จะใช้ชื่อสินค้านี้
                 'products.seller_id',
             ])
             ->get();
@@ -45,7 +45,6 @@ class CheckoutController extends Controller
                 'qty'        => (int) $row->quantity,
                 'size'       => $row->size,
                 'color'      => $row->color,
-                // แสดงรูปจาก storage ถ้ามี
                 'image'      => $row->image_url ? asset('storage/'.$row->image_url) : null,
                 'seller_id'  => (int) $row->seller_id,
             ];
@@ -75,14 +74,9 @@ class CheckoutController extends Controller
             'shipping_phone'   => ['required','string','max:30'],
             'shipping_address' => ['required','string','max:2000'],
             'confirm'          => ['required','accepted'],
-            'payment_slip'     => ['required','image','mimes:jpg,jpeg,png','max:5120'], // 5MB
-            ], 
-        
-            [
+        ], [
             'confirm.accepted' => 'กรุณาติ๊กยืนยันการสั่งซื้อ',
         ]);
-        
-        // $path = $request->file('payment_slip')->store('payment_slips', 'public');
 
         $userId = auth()->id();
 
@@ -95,7 +89,7 @@ class CheckoutController extends Controller
                 'cart_items.product_id',
                 'cart_items.quantity',
                 'cart_items.price',      // snapshot ตอน add to cart
-                'products.name as product_name',
+                'products.name as product_name', // ✅ ใช้ชื่อนี้ใส่ลง order_items.name
                 'products.seller_id',
                 'products.stock_quantity',
             ])
@@ -146,7 +140,7 @@ class CheckoutController extends Controller
                 // สร้าง order 1 ใบสำหรับ seller รายนี้
                 $order = Order::create([
                     'user_id'          => auth()->id(),
-                    'seller_id'        => $sellerId,  
+                    'seller_id'        => $sellerId,
                     'order_date'       => now(),
                     'status'           => 'pending',
                     'total_amount'     => $total,
@@ -160,6 +154,7 @@ class CheckoutController extends Controller
                     OrderItem::create([
                         'order_id'   => $order->order_id,
                         'product_id' => (int) $row->product_id,
+                        'name'       => $row->product_name, // ✅ เพิ่มบรรทัดนี้เพื่อกัน error 1364
                         'quantity'   => (int) $row->quantity,
                         'price'      => (float) $row->price,
                     ]);

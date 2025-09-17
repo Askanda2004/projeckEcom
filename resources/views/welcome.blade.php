@@ -1,4 +1,3 @@
-resources/views/welcome.blade.php
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -153,3 +152,6 @@ resources/views/welcome.blade.php
   </footer>
 </body>
 </html>
+
+
+
