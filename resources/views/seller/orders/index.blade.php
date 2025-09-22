@@ -26,6 +26,8 @@
           <svg class="w-5 h-5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="2" d="M4 7h16M4 12h16M4 17h16"/></svg>
         </div>
         <span class="font-bold">Seller</span>
+        <span class="hidden md:inline text-slate-400">/</span>
+        <span class="hidden md:inline text-slate-500">Order Management</span>
       </div>
       <div class="flex items-center gap-2">
         <form method="POST" action="{{ route('logout') }}"> @csrf
@@ -41,7 +43,7 @@
       <div class="bg-white rounded-2xl shadow-soft p-4 md:p-5">
         <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-3">Menu</h3>
         <nav class="space-y-1">
-          <a href="{{ route('seller.reports.index') }}" class="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-100 text-slate-900">
+          <a href="{{ route('seller.reports.index') }}" class="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-100">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
             Analytics & Reports
           </a>
@@ -49,7 +51,7 @@
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M20 6H4v12h16V6zM8 8h8v2H8V8zm0 4h8v2H8v-2z"/></svg>
             Product Management
           </a>
-          <a href="{{ route('seller.orders.index') }}" class="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-100">
+          <a href="{{ route('seller.orders.index') }}" class="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-100 text-slate-900">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M3 7l9-4 9 4-9 4-9-4zm0 6l9 4 9-4m-9 4v6"/></svg>
             Order Management
           </a>

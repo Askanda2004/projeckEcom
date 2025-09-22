@@ -96,15 +96,27 @@
       <!-- Product Grid -->
       <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6">
         @forelse ($products as $product)
+          @php
+            // เลือกรูปหลักจากความสัมพันธ์ images (ถ้ามี)
+            $primary = null;
+            if ($product->relationLoaded('images')) {
+              $primary = $product->images->firstWhere('is_primary', true) ?? $product->images->first();
+            } else {
+              // ถ้าหน้าก่อนไม่ได้ eager load
+              $primary = $product->images()->orderByDesc('is_primary')->orderBy('ordering')->first();
+            }
+            $imgSrc = $primary ? asset('storage/'.$primary->path)
+                    : ($product->image_url ? asset('storage/'.$product->image_url) : null);
+          @endphp
+
           <article class="group bg-white rounded-2xl border border-slate-200 shadow-soft overflow-hidden flex flex-col transition hover:-translate-y-0.5 hover:shadow-lg">
-            <!-- Image (เท่ากันทุกการ์ด) -->
-            <div class="relative aspect-square bg-slate-100 overflow-hidden">
-              @if($product->image_url)
-                <img src="{{ asset('storage/'.$product->image_url) }}"
+            <!-- Image -->
+            <a href="{{ route('customer.products.show', $product) }}" class="relative aspect-square bg-slate-100 overflow-hidden block">
+              @if($imgSrc)
+                <img src="{{ $imgSrc }}"
                     alt="{{ $product->name }}"
                     class="w-full h-full object-cover object-center transition duration-300 group-hover:scale-[1.03]" />
               @else
-                <!-- Placeholder -->
                 <div class="absolute inset-0 grid place-items-center bg-gradient-to-br from-slate-100 to-slate-200">
                   <svg class="w-10 h-10 text-slate-400" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10l-4-4-3 3-4-4-5 5V7z"/>
@@ -112,23 +124,23 @@
                 </div>
               @endif
 
-              <!-- Category badge -->
               <div class="absolute left-3 top-3 text-[11px] px-2 py-1 rounded-full bg-white/90 text-slate-700 shadow">
                 {{ $product->category->category_name ?? 'ไม่ระบุหมวด' }}
               </div>
 
-              <!-- New badge -->
               @if(isset($product->created_at) && \Illuminate\Support\Carbon::parse($product->created_at)->gte(now()->subDays(14)))
                 <div class="absolute right-3 top-3 text-[11px] px-2 py-1 rounded-full bg-primary text-white shadow">
                   ใหม่
                 </div>
               @endif
-            </div>
+            </a>
 
             <!-- Info -->
             <div class="p-4 flex flex-col flex-1 justify-between">
               <div>
-                <h2 class="font-semibold leading-snug line-clamp-2">{{ $product->name }}</h2>
+                <a href="{{ route('customer.products.show', $product) }}" class="block hover:underline">
+                  <h2 class="font-semibold leading-snug line-clamp-2">{{ $product->name }}</h2>
+                </a>
                 <p class="text-xs text-slate-500 mt-1">
                   ขนาด: {{ $product->size ?? '—' }} · สี: {{ $product->color ?? '—' }}
                 </p>
@@ -147,19 +159,16 @@
               <form method="POST" action="{{ route('customer.cart.add', $product) }}"
                     class="mt-4 flex items-center gap-2">
                 @csrf
-                {{-- <input type="number" name="qty" value="1" min="1"
-                class="w-16 rounded-lg border border-slate-300 bg-slate-50 px-2 py-1.5 text-center
-                        focus:border-blue-500 focus:ring-2 focus:ring-blue-200 text-sm" /> --}}
-                        <div class="flex items-center border rounded-lg overflow-hidden">
-                          <button type="button"
-                                  onclick="this.nextElementSibling.stepDown()"
-                                  class="px-2 py-1 text-slate-600 hover:bg-slate-100">−</button>
-                          <input type="number" name="qty" value="1" min="1"
-                                class="w-12 text-center border-x border-slate-200 focus:outline-none" />
-                          <button type="button"
-                                  onclick="this.previousElementSibling.stepUp()"
-                                  class="px-2 py-1 text-slate-600 hover:bg-slate-100">+</button>
-                        </div>
+                <div class="flex items-center border rounded-lg overflow-hidden">
+                  <button type="button"
+                          onclick="this.nextElementSibling.stepDown()"
+                          class="px-2 py-1 text-slate-600 hover:bg-slate-100">−</button>
+                  <input type="number" name="qty" value="1" min="1"
+                        class="w-12 text-center border-x border-slate-200 focus:outline-none" />
+                  <button type="button"
+                          onclick="this.previousElementSibling.stepUp()"
+                          class="px-2 py-1 text-slate-600 hover:bg-slate-100">+</button>
+                </div>
                 <button type="submit"
                         class="flex-1 rounded-lg bg-slate-900 text-white py-2.5 hover:bg-slate-800 transition">
                   หยิบใส่ตะกร้า

@@ -6,9 +6,11 @@ use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Seller\ProductController as SellerProductController;
 use App\Http\Controllers\Seller\OrderController as SellerOrderController;
 use App\Http\Controllers\Seller\ReportController;
+use App\Http\Controllers\Seller\ProductController;
 
 use App\Http\Controllers\Customer\ShopController;
 use App\Http\Controllers\Customer\CheckoutController;
+use App\Http\Controllers\Customer\ProductController as CustomerProductController;
 
 // use App\Http\Controllers\HomeController;
 // use App\Http\Controllers\Shop\ProductBrowseController;
@@ -67,6 +69,11 @@ Route::middleware(['auth','verified'])->group(function () {
         Route::patch ('/products/{product:product_id}',        [SellerProductController::class, 'update'])->name('products.update');
         Route::delete('/products/{product:product_id}',        [SellerProductController::class, 'destroy'])->name('products.destroy');
 
+        Route::patch('products/{product}/images/{image}', [ProductController::class, 'updateImage'])
+            ->name('products.images.update');     // แทนที่ไฟล์ + ตั้งเป็นรูปหลัก
+        Route::delete('products/{product}/images/{image}', [ProductController::class, 'destroyImage'])
+            ->name('products.images.destroy');    // ลบรูป
+
         /*
         |---------------------------
         | Order Management (ของฉัน)
@@ -91,7 +98,8 @@ Route::middleware(['auth','verified'])->group(function () {
     Route::middleware(['auth','verified','role:customer'])
     ->prefix('customer')->name('customer.')
     ->group(function () {
-        Route::get('/shop',  [ShopController::class, 'shop'])->name('shop');
+        // Route::get('/shop',  [ShopController::class, 'shop'])->name('shop');
+        Route::get('/shop', [CustomerProductController::class, 'index'])->name('shop');
 
         Route::get('/cart',  [ShopController::class, 'cart'])->name('cart');
 
@@ -109,6 +117,9 @@ Route::middleware(['auth','verified'])->group(function () {
         Route::get('/checkout',  [CheckoutController::class, 'create'])->name('checkout');
         Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.place');
         // Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+
+        Route::get('/products/{product:product_id}', [CustomerProductController::class, 'show'])
+        ->name('products.show');
     });
     // Route::middleware(['auth','verified','role:customer'])
     // ->prefix('customer')

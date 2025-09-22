@@ -82,16 +82,23 @@
                     class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 focus:border-primary focus:ring-primary/20">{{ old('description') }}</textarea>
         </div>
 
-        {{-- ✅ อัปโหลดรูปจากไฟล์ + preview --}}
+        {{-- ✅ อัปโหลดหลายรูป + preview หลายรูป --}}
         <div class="md:col-span-2">
           <label class="block text-sm font-medium">รูปภาพสินค้า</label>
-          <input id="image" type="file" name="image" accept="image/*"
+          <input id="images" type="file" name="images[]" accept="image/*" multiple
                  class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 focus:border-primary focus:ring-primary/20">
-          @error('image') <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
+          @error('images') <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
+          @error('images.*') <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
 
           <div id="previewWrap" class="mt-3 hidden">
-            <p class="text-xs text-slate-500 mb-1">ตัวอย่างรูปที่จะอัปโหลด:</p>
-            <img id="previewImg" class="h-24 rounded border">
+            <div class="flex items-center justify-between mb-2">
+              <p class="text-xs text-slate-500">ตัวอย่างรูปที่จะอัปโหลด:</p>
+              <button type="button" id="clearImages"
+                class="text-xs px-2 py-1 rounded-lg border border-slate-200 hover:bg-slate-50">
+                ล้างรูปที่เลือก
+              </button>
+            </div>
+            <div id="previewList" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3"></div>
           </div>
         </div>
 
@@ -104,17 +111,57 @@
   </main>
 
   <script>
-    // แสดง preview รูป
-    const input = document.getElementById('image');
-    const wrap  = document.getElementById('previewWrap');
-    const img   = document.getElementById('previewImg');
+    // พรีวิวหลายรูป + ลบทีละรูป + ล้างทั้งหมด
+    (function () {
+      const input = document.getElementById('images');
+      const wrap  = document.getElementById('previewWrap');
+      const list  = document.getElementById('previewList');
+      const clear = document.getElementById('clearImages');
 
-    input?.addEventListener('change', (e) => {
-      const file = e.target.files?.[0];
-      if (!file) { wrap.classList.add('hidden'); return; }
-      img.src = URL.createObjectURL(file);
-      wrap.classList.remove('hidden');
-    });
+      let dt = new DataTransfer();
+
+      input?.addEventListener('change', function () {
+        dt = new DataTransfer();
+        list.innerHTML = '';
+
+        const files = Array.from(input.files || []);
+        if (!files.length) { wrap.classList.add('hidden'); return; }
+
+        files.forEach((file, idx) => {
+          dt.items.add(file);
+          const url = URL.createObjectURL(file);
+
+          const item = document.createElement('div');
+          item.className = 'relative group';
+          item.innerHTML = `
+            <img src="${url}" class="h-24 w-full object-cover rounded-lg border">
+            <button type="button" data-index="${idx}"
+              class="absolute -top-2 -right-2 hidden group-hover:block bg-white/90 border border-slate-200 rounded-full p-1 shadow">✕</button>
+          `;
+
+          item.querySelector('button').addEventListener('click', function () {
+            const i = Number(this.dataset.index);
+            const keep = Array.from(dt.files).filter((_, k) => k !== i);
+            dt = new DataTransfer();
+            keep.forEach(f => dt.items.add(f));
+            input.files = dt.files;
+            input.dispatchEvent(new Event('change'));
+          });
+
+          list.appendChild(item);
+        });
+
+        input.files = dt.files;
+        wrap.classList.toggle('hidden', dt.files.length === 0);
+      });
+
+      clear?.addEventListener('click', function () {
+        dt = new DataTransfer();
+        input.value = '';
+        list.innerHTML = '';
+        wrap.classList.add('hidden');
+      });
+    })();
   </script>
 </body>
 </html>

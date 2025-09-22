@@ -44,6 +44,12 @@ class Product extends Model
     {
         return $this->belongsTo(Category::class, 'category_id', 'category_id');
     }
+
+    public function images()
+    {
+        return $this->hasMany(\App\Models\ProductImage::class, 'product_id', 'product_id')
+                    ->orderBy('ordering');
+    }
     
     protected static function booted()
     {

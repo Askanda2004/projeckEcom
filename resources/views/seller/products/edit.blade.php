@@ -25,8 +25,8 @@
       </div>
     @endif
 
+    {{-- ฟอร์มที่ 1: อัปเดตข้อมูลสินค้า + เพิ่มรูปใหม่ --}}
     <div class="bg-white rounded-2xl shadow-soft p-6 sm:p-8">
-      {{-- ✅ ต้องมี enctype เพื่อส่งไฟล์ --}}
       <form method="POST"
             action="{{ route('seller.products.update', $product) }}"
             enctype="multipart/form-data"
@@ -83,24 +83,23 @@
                     class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 focus:border-primary focus:ring-primary/20">{{ old('description', $product->description) }}</textarea>
         </div>
 
-        {{-- รูปปัจจุบัน --}}
-        @if($product->image_url)
-          <div class="md:col-span-2">
-            <p class="text-sm text-slate-500 mb-1">รูปปัจจุบัน:</p>
-            <img src="{{ asset('storage/'.$product->image_url) }}" class="h-24 rounded border">
-          </div>
-        @endif
-
-        {{-- ✅ อัปโหลดรูปใหม่ + preview ก่อนบันทึก --}}
+        {{-- อัปโหลดรูปเพิ่ม (หลายรูป) + preview --}}
         <div class="md:col-span-2">
-          <label class="block text-sm font-medium">อัปโหลดรูปใหม่ (ถ้าต้องการเปลี่ยน)</label>
-          <input id="image" type="file" name="image" accept="image/*"
+          <label class="block text-sm font-medium">อัปโหลดรูปเพิ่ม (ไม่บังคับ)</label>
+          <input id="newImages" type="file" name="images[]" accept="image/*" multiple
                  class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 focus:border-primary focus:ring-primary/20">
-          @error('image') <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
+          @error('images') <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
+          @error('images.*') <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
 
-          <div id="previewWrap" class="mt-3 hidden">
-            <p class="text-xs text-slate-500 mb-1">ตัวอย่างรูปใหม่:</p>
-            <img id="previewImg" class="h-24 rounded border">
+          <div id="previewWrapNew" class="mt-3 hidden">
+            <div class="flex items-center justify-between mb-2">
+              <p class="text-xs text-slate-500">ตัวอย่างรูปใหม่:</p>
+              <button type="button" id="clearImagesNew"
+                class="text-xs px-2 py-1 rounded-lg border border-slate-200 hover:bg-slate-50">
+                ล้างรูปที่เลือก
+              </button>
+            </div>
+            <div id="previewListNew" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3"></div>
           </div>
         </div>
 
@@ -111,36 +110,124 @@
       </form>
     </div>
 
-    {{-- Danger zone: ลบสินค้า --}}
-    <div class="mt-6 bg-white rounded-2xl shadow-soft p-6">
-      <div class="flex items-center justify-between">
-        <div>
-          <h2 class="font-semibold">ลบสินค้า</h2>
-          <p class="text-sm text-slate-500">การลบไม่สามารถย้อนกลับได้</p>
+    {{-- ส่วนรูปเดิม: ฟอร์มที่ 2..n (อยู่นอกฟอร์มหลัก) --}}
+    <div class="mt-6 bg-white rounded-2xl shadow-soft p-6 sm:p-8">
+      <h2 class="font-semibold mb-3">รูปปัจจุบัน</h2>
+
+      @php
+        $images = $product->relationLoaded('images') ? $product->images : $product->images()->orderBy('ordering')->get();
+      @endphp
+
+      @if($images->count())
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          @foreach($images as $img)
+            <div class="rounded-xl border border-slate-200 p-3">
+              <div class="relative mb-3">
+                <img src="{{ asset('storage/'.$img->path) }}" class="h-32 w-full object-cover rounded-lg border" alt="">
+                @if($img->is_primary)
+                  <span class="absolute bottom-1 left-1 text-[10px] bg-primary text-white rounded px-1.5 py-0.5">Primary</span>
+                @endif
+              </div>
+
+              {{-- ฟอร์มอัปเดตรูปนี้ --}}
+              <form method="POST"
+                    action="{{ route('seller.products.images.update', [$product, $img]) }}"
+                    enctype="multipart/form-data"
+                    class="space-y-2">
+                @csrf
+                @method('PATCH')
+
+                <div>
+                  <label class="text-xs text-slate-600 block mb-1">แทนที่รูปนี้</label>
+                  <input type="file" name="replace_image" accept="image/*"
+                         class="block w-full text-sm rounded-lg border border-slate-200 px-3 py-1.5 focus:border-primary focus:ring-primary/20">
+                  @error('replace_image') <p class="text-xs text-red-600 mt-1">{{ $message }}</p> @enderror
+                </div>
+
+                {{-- <label class="inline-flex items-center gap-2 text-xs">
+                  <input type="checkbox" name="set_primary" value="1" @checked($img->is_primary) class="rounded border-slate-300">
+                  ตั้งเป็นรูปหลัก
+                </label> --}}
+
+                <div class="flex items-center gap-2 pt-1">
+                  <button class="text-xs rounded-lg bg-primary text-white px-3 py-1.5 hover:bg-blue-700">
+                    อัปเดตรูปนี้
+                  </button>
+                </div>
+              </form>
+
+              {{-- ฟอร์มลบรูป (ฟอร์มแยก) --}}
+              <form method="POST"
+                    action="{{ route('seller.products.images.destroy', [$product, $img]) }}"
+                    onsubmit="return confirm('ลบรูปนี้ถาวร?')"
+                    class="mt-2">
+                @csrf
+                @method('DELETE')
+                <button class="text-xs rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-rose-700 hover:bg-rose-100">
+                  ลบรูปนี้
+                </button>
+              </form>
+            </div>
+          @endforeach
         </div>
-        <form method="POST" action="{{ route('seller.products.destroy', $product) }}"
-              onsubmit="return confirm('Delete this product permanently?')">
-          @csrf
-          @method('DELETE')
-          <button class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-rose-700 hover:bg-rose-100">
-            Delete Product
-          </button>
-        </form>
-      </div>
+      @else
+        <p class="text-xs text-slate-400">— ไม่มีรูปปัจจุบัน —</p>
+      @endif
     </div>
   </main>
 
   <script>
-    // preview รูปใหม่
-    const input = document.getElementById('image');
-    const wrap  = document.getElementById('previewWrap');
-    const img   = document.getElementById('previewImg');
-    input?.addEventListener('change', (e) => {
-      const file = e.target.files?.[0];
-      if (!file) { wrap.classList.add('hidden'); return; }
-      img.src = URL.createObjectURL(file);
-      wrap.classList.remove('hidden');
-    });
+    // พรีวิวหลายรูป (ฟอร์มเพิ่มรูปใหม่)
+    (function () {
+      const input = document.getElementById('newImages');
+      const wrap  = document.getElementById('previewWrapNew');
+      const list  = document.getElementById('previewListNew');
+      const clear = document.getElementById('clearImagesNew');
+
+      let dt = new DataTransfer();
+
+      input?.addEventListener('change', function () {
+        dt = new DataTransfer();
+        list.innerHTML = '';
+
+        const files = Array.from(input.files || []);
+        if (!files.length) { wrap.classList.add('hidden'); return; }
+
+        files.forEach((file, idx) => {
+          dt.items.add(file);
+          const url = URL.createObjectURL(file);
+
+          const item = document.createElement('div');
+          item.className = 'relative group';
+          item.innerHTML = `
+            <img src="${url}" class="h-24 w-full object-cover rounded-lg border">
+            <button type="button" data-index="${idx}"
+              class="absolute -top-2 -right-2 hidden group-hover:block bg-white/90 border border-slate-200 rounded-full p-1 shadow">✕</button>
+          `;
+
+          item.querySelector('button').addEventListener('click', function () {
+            const i = Number(this.dataset.index);
+            const keep = Array.from(dt.files).filter((_, k) => k !== i);
+            dt = new DataTransfer();
+            keep.forEach(f => dt.items.add(f));
+            input.files = dt.files;
+            input.dispatchEvent(new Event('change'));
+          });
+
+          list.appendChild(item);
+        });
+
+        input.files = dt.files;
+        wrap.classList.toggle('hidden', dt.files.length === 0);
+      });
+
+      clear?.addEventListener('click', function () {
+        dt = new DataTransfer();
+        input.value = '';
+        list.innerHTML = '';
+        wrap.classList.add('hidden');
+      });
+    })();
   </script>
 </body>
 </html>
