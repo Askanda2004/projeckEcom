@@ -31,7 +31,7 @@
 
       <nav class="flex items-center gap-3 text-sm">
         <a href="{{ route('admin.index') }}" class="text-slate-600 hover:text-slate-900">Manage Users</a>
-        <a href="{{ route('dashboard') }}" class="text-slate-600 hover:text-slate-900">Dashboard</a>
+        {{-- <a href="{{ route('dashboard') }}" class="text-slate-600 hover:text-slate-900">Dashboard</a> --}}
       </nav>
     </div>
   </header>

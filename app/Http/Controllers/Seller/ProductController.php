@@ -41,7 +41,7 @@ class ProductController extends Controller
             ->paginate(16)
             ->withQueryString();
 
-        return view('customer.shop', [
+        return view('seller.products.index', [
             'products' => $products,
             'q'        => $q,
             'category' => $category,

@@ -40,17 +40,42 @@
                  class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 focus:border-primary focus:ring-primary/20">
         </div>
 
-        <div>
+        {{-- <div>
           <label class="block text-sm font-medium">ขนาด</label>
           <input name="size" value="{{ old('size', $product->size) }}"
                  class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 focus:border-primary focus:ring-primary/20">
+        </div> --}}
+        <div>
+          <label class="block text-sm font-medium">ขนาด</label>
+          <select name="size"
+                  class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 focus:border-primary focus:ring-primary/20">
+            <option value="">— เลือกขนาด —</option>
+            <option value="S"  @selected(old('size', $product->size) == 'S')>S</option>
+            <option value="M"  @selected(old('size', $product->size) == 'M')>M</option>
+            <option value="L"  @selected(old('size', $product->size) == 'L')>L</option>
+            <option value="XL" @selected(old('size', $product->size) == 'XL')>XL</option>
+          </select>
         </div>
 
-        <div>
+
+        {{-- <div>
           <label class="block text-sm font-medium">สี</label>
           <input name="color" value="{{ old('color', $product->color) }}"
                 class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 focus:border-primary focus:ring-primary/20">
+        </div> --}}
+        <div>
+          <label class="block text-sm font-medium">สี</label>
+          <select name="color"
+                  class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 focus:border-primary focus:ring-primary/20">
+            <option value="">— เลือกสี —</option>
+            <option value="แดง"    @selected(old('color', $product->color) == 'แดง')>แดง</option>
+            <option value="น้ำเงิน" @selected(old('color', $product->color) == 'น้ำเงิน')>น้ำเงิน</option>
+            <option value="เขียว"  @selected(old('color', $product->color) == 'เขียว')>เขียว</option>
+            <option value="ดำ"     @selected(old('color', $product->color) == 'ดำ')>ดำ</option>
+            <option value="ขาว"    @selected(old('color', $product->color) == 'ขาว')>ขาว</option>
+          </select>
         </div>
+
 
         <div>
           <label class="block text-sm font-medium">ราคา</label>

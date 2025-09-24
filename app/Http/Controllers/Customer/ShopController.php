@@ -21,6 +21,7 @@ class ShopController extends Controller
                     $w->where('name', 'like', "%{$q}%")
                       ->orWhere('description', 'like', "%{$q}%")
                       ->orWhere('size', 'like', "%{$q}%")
+                      ->orWhere('description', 'like', "%{$q}%")
                       ->orWhere('color', 'like', "%{$q}%");
                 });
             })
