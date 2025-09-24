@@ -70,6 +70,11 @@ class ShopController extends Controller
         ]);
         $qty  = (int) $data['qty'];
 
+        // ✅ เช็กจำนวนไม่ให้เกินสต็อก
+        if ($qty > $product->stock_quantity) {
+            return back()->with('status', 'จำนวนที่เลือกมากกว่าสต็อกที่มี')->withInput();
+        }
+
         $cart = $this->userCart();
 
         // upsert รายการ
@@ -77,10 +82,18 @@ class ShopController extends Controller
             'cart_id'    => $cart->cart_id,
             'product_id' => $product->product_id,
         ]);
+
         if (!$item->exists) {
             $item->price = (float) $product->price; // snapshot ครั้งแรก
+            $item->quantity = 0;
         }
-        $item->quantity  = (int)($item->quantity ?? 0) + $qty;
+
+        // ✅ รวมกับของเดิมแล้วก็ต้องไม่เกินสต็อกเช่นกัน
+        if ($item->quantity + $qty > $product->stock_quantity) {
+            return back()->with('status', 'จำนวนรวมในตะกร้าเกินสต็อกที่มี')->withInput();
+        }
+
+        $item->quantity  = $item->quantity + $qty;
         $item->size      = $product->size;
         $item->color     = $product->color ?? null;
         $item->image_url = $product->image_url;
@@ -90,6 +103,7 @@ class ShopController extends Controller
 
         return back()->with('status','เพิ่มสินค้าลงตะกร้าแล้ว');
     }
+
 
     /** ✅ อัปเดตจำนวนสินค้า: id = product_id */
     public function updateCart(Request $request, $id)

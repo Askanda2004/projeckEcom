@@ -40,6 +40,19 @@
                  class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 focus:border-primary focus:ring-primary/20">
         </div>
 
+        <div>
+          <label class="block text-sm font-medium">หมวดหมู่</label>
+          <select name="category_id"
+                  class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 focus:border-primary focus:ring-primary/20">
+            <option value="">— ไม่ระบุ —</option>
+            @foreach ($categories as $c)
+              <option value="{{ $c->category_id }}" @selected(old('category_id', $product->category_id) == $c->category_id)>
+                {{ $c->category_name }}
+              </option>
+            @endforeach
+          </select>
+        </div>
+
         {{-- <div>
           <label class="block text-sm font-medium">ขนาด</label>
           <input name="size" value="{{ old('size', $product->size) }}"
@@ -54,6 +67,8 @@
             <option value="M"  @selected(old('size', $product->size) == 'M')>M</option>
             <option value="L"  @selected(old('size', $product->size) == 'L')>L</option>
             <option value="XL" @selected(old('size', $product->size) == 'XL')>XL</option>
+            <option value="47" @selected(old('size', $product->size) == '47')>47</option>
+            <option value="50" @selected(old('size', $product->size) == '50')>50</option>
           </select>
         </div>
 
@@ -89,7 +104,7 @@
                  class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 focus:border-primary focus:ring-primary/20">
         </div>
 
-        <div>
+        {{-- <div>
           <label class="block text-sm font-medium">หมวดหมู่</label>
           <select name="category_id"
                   class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 focus:border-primary focus:ring-primary/20">
@@ -100,11 +115,11 @@
               </option>
             @endforeach
           </select>
-        </div>
+        </div> --}}
 
         <div class="md:col-span-2">
           <label class="block text-sm font-medium">รายละเอียดสินค้า</label>
-          <textarea name="description" rows="4"
+          <textarea name="description" rows="2"
                     class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 focus:border-primary focus:ring-primary/20">{{ old('description', $product->description) }}</textarea>
         </div>
 

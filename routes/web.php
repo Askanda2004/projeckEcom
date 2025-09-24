@@ -12,8 +12,6 @@ use App\Http\Controllers\Customer\ShopController;
 use App\Http\Controllers\Customer\CheckoutController;
 use App\Http\Controllers\Customer\ProductController as CustomerProductController;
 
-// use App\Http\Controllers\HomeController;
-// use App\Http\Controllers\Shop\ProductBrowseController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn() => view('welcome'));

@@ -10,12 +10,10 @@
       theme: {
         extend: {
           colors: {
-            primary: { DEFAULT: '#2563eb' },   // blue-600
+            primary: { DEFAULT: '#2563eb' },
             ink: '#0f172a'
           },
-          boxShadow: {
-            soft: '0 10px 30px rgba(2,6,23,.06)'
-          },
+          boxShadow: { soft: '0 10px 30px rgba(2,6,23,.06)' },
           backgroundImage: {
             'glass': 'radial-gradient(1000px 200px at 50% -50%, rgba(37,99,235,.08), transparent)'
           }
@@ -23,6 +21,14 @@
       }
     }
   </script>
+  <style>
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  </style>
 </head>
 <body class="bg-slate-50 text-slate-800">
 
@@ -89,24 +95,18 @@
             <p class="text-sm text-slate-500">เลือกชมสินค้าของทุกร้านค้าได้เลย</p>
           @endif
         </div>
-        {{-- ใส่ที่ว่างไว้ให้อนาคต หากจะเพิ่มตัวกรอง/เรียง --}}
-        {{-- <div class="hidden sm:block text-xs text-slate-400">UI โมเดิร์น • โหลดเร็ว • ตอบสนองไว</div> --}}
       </div>
 
       <!-- Product Grid -->
       <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6">
         @forelse ($products as $product)
           @php
-            // เลือกรูปหลักจากความสัมพันธ์ images (ถ้ามี)
-            $primary = null;
-            if ($product->relationLoaded('images')) {
-              $primary = $product->images->firstWhere('is_primary', true) ?? $product->images->first();
-            } else {
-              // ถ้าหน้าก่อนไม่ได้ eager load
-              $primary = $product->images()->orderByDesc('is_primary')->orderBy('ordering')->first();
-            }
+            $primary = $product->relationLoaded('images')
+              ? ($product->images->firstWhere('is_primary', true) ?? $product->images->first())
+              : $product->images()->orderByDesc('is_primary')->orderBy('ordering')->first();
             $imgSrc = $primary ? asset('storage/'.$primary->path)
                     : ($product->image_url ? asset('storage/'.$product->image_url) : null);
+            $stock = (int)($product->stock_quantity ?? 0);
           @endphp
 
           <article class="group bg-white rounded-2xl border border-slate-200 shadow-soft overflow-hidden flex flex-col transition hover:-translate-y-0.5 hover:shadow-lg">
@@ -114,8 +114,8 @@
             <a href="{{ route('customer.products.show', $product) }}" class="relative aspect-square bg-slate-100 overflow-hidden block">
               @if($imgSrc)
                 <img src="{{ $imgSrc }}"
-                    alt="{{ $product->name }}"
-                    class="w-full h-full object-cover object-center transition duration-300 group-hover:scale-[1.03]" />
+                     alt="{{ $product->name }}"
+                     class="w-full h-full object-cover object-center transition duration-300 group-hover:scale-[1.03]" />
               @else
                 <div class="absolute inset-0 grid place-items-center bg-gradient-to-br from-slate-100 to-slate-200">
                   <svg class="w-10 h-10 text-slate-400" viewBox="0 0 24 24" fill="currentColor">
@@ -141,17 +141,24 @@
                 <a href="{{ route('customer.products.show', $product) }}" class="block hover:underline">
                   <h2 class="font-semibold leading-snug line-clamp-2">{{ $product->name }}</h2>
                 </a>
+
+                <!-- Description -->
+                @if(!empty($product->description))
+                  <p class="mt-1 text-xs text-slate-600 line-clamp-2">
+                    {{ \Illuminate\Support\Str::limit(strip_tags($product->description), 120) }}
+                  </p>
+                @endif
+
                 <p class="text-xs text-slate-500 mt-1">
                   ขนาด: {{ $product->size ?? '—' }} · สี: {{ $product->color ?? '—' }}
                 </p>
+
                 <div class="mt-2 flex items-center justify-between">
                   <div class="font-bold text-lg text-primary">฿{{ number_format($product->price,2) }}</div>
-                  @if(isset($product->stock_quantity))
-                    <span class="text-[11px] px-2 py-0.5 rounded-full
-                      {{ $product->stock_quantity > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200' }}">
-                      {{ $product->stock_quantity > 0 ? 'พร้อมส่ง' : 'หมดชั่วคราว' }}
-                    </span>
-                  @endif
+                  <span class="text-[11px] px-2 py-0.5 rounded-full
+                    {{ $stock > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200' }}">
+                    {{ $stock > 0 ? 'พร้อมส่ง · เหลือ ' . $stock : 'หมดชั่วคราว' }}
+                  </span>
                 </div>
               </div>
 
@@ -159,18 +166,24 @@
               <form method="POST" action="{{ route('customer.cart.add', $product) }}"
                     class="mt-4 flex items-center gap-2">
                 @csrf
-                <div class="flex items-center border rounded-lg overflow-hidden">
+                <div class="qty-wrap flex items-center border rounded-lg overflow-hidden"
+                     data-min="1" data-max="{{ $stock }}">
                   <button type="button"
-                          onclick="this.nextElementSibling.stepDown()"
-                          class="px-2 py-1 text-slate-600 hover:bg-slate-100">−</button>
-                  <input type="number" name="qty" value="1" min="1"
-                        class="w-12 text-center border-x border-slate-200 focus:outline-none" />
+                          class="btn-dec px-2 py-1 text-slate-600 hover:bg-slate-100">−</button>
+                  <input type="number"
+                         name="qty"
+                         class="qty-input w-12 text-center border-x border-slate-200 focus:outline-none"
+                         value="{{ $stock > 0 ? 1 : 0 }}"
+                         min="{{ $stock > 0 ? 1 : 0 }}"
+                         max="{{ $stock }}"
+                         {{ $stock <= 0 ? 'readonly' : '' }} />
                   <button type="button"
-                          onclick="this.previousElementSibling.stepUp()"
-                          class="px-2 py-1 text-slate-600 hover:bg-slate-100">+</button>
+                          class="btn-inc px-2 py-1 text-slate-600 hover:bg-slate-100">+</button>
                 </div>
+
                 <button type="submit"
-                        class="flex-1 rounded-lg bg-slate-900 text-white py-2.5 hover:bg-slate-800 transition">
+                        class="flex-1 rounded-lg {{ $stock>0 ? 'bg-slate-900 hover:bg-slate-800' : 'bg-slate-300 cursor-not-allowed' }} text-white py-2.5 transition"
+                        {{ $stock<=0 ? 'disabled' : '' }}>
                   หยิบใส่ตะกร้า
                 </button>
               </form>
@@ -183,11 +196,40 @@
 
       <!-- Pagination -->
       <div class="mt-8">
-        {{-- Laravel default pagination --}}
         {{ $products->links() }}
       </div>
     </div>
   </main>
 
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.qty-wrap').forEach(wrap => {
+        const input = wrap.querySelector('.qty-input');
+        const dec   = wrap.querySelector('.btn-dec');
+        const inc   = wrap.querySelector('.btn-inc');
+        const min   = Number(wrap.dataset.min || 1);
+        const max   = Number(wrap.dataset.max || 1);
+
+        function clamp() {
+          let v = Number(input.value || 0);
+          if (isNaN(v)) v = min;
+          if (v < min) v = min;
+          if (v > max) v = max;
+          input.value = v;
+
+          dec.disabled = v <= min;
+          inc.disabled = v >= max;
+          dec.classList.toggle('opacity-40', dec.disabled);
+          inc.classList.toggle('opacity-40', inc.disabled);
+        }
+
+        dec.addEventListener('click', () => { input.stepDown(); clamp(); });
+        inc.addEventListener('click', () => { input.stepUp();   clamp(); });
+        input.addEventListener('input', clamp);
+
+        clamp();
+      });
+    });
+  </script>
 </body>
 </html>
