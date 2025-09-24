@@ -66,6 +66,8 @@
             <option value="M"  @selected(old('size') == 'M')>M</option>
             <option value="L"  @selected(old('size') == 'L')>L</option>
             <option value="XL" @selected(old('size') == 'XL')>XL</option>
+            <option value="47"  @selected(old('size') == '47')>47</option>
+            <option value="50" @selected(old('size') == '50')>50</option>
           </select>
         </div>
 

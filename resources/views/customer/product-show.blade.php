@@ -79,7 +79,7 @@
 
           @if($product->description)
             <div class="prose prose-slate max-w-none">
-              <h2 class="text-base font-semibold">รายละเอียด</h2>
+              <h2 class="text-base font-semibold">แบรนด์</h2>
               <p class="whitespace-pre-line">{{ $product->description }}</p>
             </div>
           @endif

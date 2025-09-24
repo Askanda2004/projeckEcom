@@ -145,12 +145,17 @@
                 <!-- Description -->
                 @if(!empty($product->description))
                   <p class="mt-1 text-xs text-slate-600 line-clamp-2">
+                    แบรนด์:
                     {{ \Illuminate\Support\Str::limit(strip_tags($product->description), 120) }}
                   </p>
                 @endif
 
                 <p class="text-xs text-slate-500 mt-1">
                   ขนาด: {{ $product->size ?? '—' }} · สี: {{ $product->color ?? '—' }}
+                </p>
+
+                <p class="text-xs text-slate-500 mt-1">
+                  สี: {{ $product->color ?? '—' }}
                 </p>
 
                 <div class="mt-2 flex items-center justify-between">
