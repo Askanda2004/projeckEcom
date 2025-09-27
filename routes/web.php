@@ -7,6 +7,8 @@ use App\Http\Controllers\Seller\ProductController as SellerProductController;
 use App\Http\Controllers\Seller\OrderController as SellerOrderController;
 use App\Http\Controllers\Seller\ReportController;
 use App\Http\Controllers\Seller\ProductController;
+use App\Http\Controllers\Seller\CategoryController as SellerCategoryController;
+use App\Http\Controllers\Seller\SubcategoryController as SellerSubcategoryController;
 
 use App\Http\Controllers\Customer\ShopController;
 use App\Http\Controllers\Customer\CheckoutController;
@@ -86,6 +88,9 @@ Route::middleware(['auth','verified'])->group(function () {
 
         // (ออปชัน) เผื่อโฮสต์บางที่ block PATCH/DELETE — เพิ่มสำรองเป็น POST
         Route::post  ('/orders/{order:order_id}/status',        [SellerOrderController::class, 'updateStatus'])->name('orders.status.post');
+
+        Route::get('/categories',    [SellerCategoryController::class, 'index'])->name('categories.index');
+        Route::get('/subcategories', [SellerSubcategoryController::class, 'index'])->name('subcategories.index');
 
         // รายงานยอดขาย
         Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');

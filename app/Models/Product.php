@@ -51,6 +51,10 @@ class Product extends Model
                     ->orderBy('ordering');
     }
     
+    public function products() {
+        return $this->hasMany(\App\Models\Product::class, 'category_id', 'category_id');
+    }
+    
     protected static function booted()
     {
         static::creating(function ($product) {

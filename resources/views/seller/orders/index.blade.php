@@ -37,6 +37,12 @@
     </div>
   </header>
 
+  @php
+    $isProductSection = request()->routeIs('seller.products.*')
+                      || request()->routeIs('seller.categories.*')
+                      || request()->routeIs('seller.subcategories.*');
+  @endphp
+
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-12 gap-6">
     <!-- SIDEBAR -->
     <aside class="col-span-12 md:col-span-3">
@@ -47,10 +53,59 @@
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
             Analytics & Reports
           </a>
-          <a href="{{ route('seller.products.index') }}" class="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-100">
-            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M20 6H4v12h16V6zM8 8h8v2H8V8zm0 4h8v2H8v-2z"/></svg>
-            Product Management
-          </a>
+
+          <!-- Product Management (collapsible) -->
+          <div class="rounded-2xl">
+            <button type="button"
+                    class="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl {{ $isProductSection ? 'bg-slate-100 text-slate-900' : 'hover:bg-slate-100' }} transition pr-1"
+                    data-toggle="submenu-products"
+                    aria-expanded="{{ $isProductSection ? 'true' : 'false' }}"
+                    aria-controls="submenu-products">
+              <span class="flex items-center gap-2">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M3 6h18v2H3V6zm0 5h18v2H3v-2zm0 5h18v2H3v-2z"/></svg>
+                Product Management
+              </span>
+              <svg class="w-4 h-4 transition-transform shrink-0"
+                   style="transform: rotate({{ $isProductSection ? '90' : '0' }}deg)"
+                   data-caret viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/>
+              </svg>
+            </button>
+
+            <div id="submenu-products" class="mt-1 {{ $isProductSection ? '' : 'hidden' }}">
+              <ul class="pl-3 border-l border-slate-200 space-y-1">
+                <li>
+                  <a href="{{ route('seller.products.index') }}"
+                     class="submenu-link flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-50 {{ request()->routeIs('seller.products.index') ? 'bg-slate-100 text-slate-900' : '' }}">
+                    <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
+                    สินค้าทั้งหมด
+                  </a>
+                </li>
+                <li>
+                  <a href="{{ route('seller.products.create') }}"
+                     class="submenu-link flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-50 {{ request()->routeIs('seller.products.create') ? 'bg-slate-100 text-slate-900' : '' }}">
+                    <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
+                    เพิ่มสินค้า
+                  </a>
+                </li>
+                {{-- <li>
+                  <a href="{{ route('seller.categories.index') }}"
+                     class="submenu-link flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-50 {{ request()->routeIs('seller.categories.*') ? 'bg-slate-100 text-slate-900' : '' }}">
+                    <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
+                    หมวดหมู่สินค้า
+                  </a>
+                </li> --}}
+                <li>
+                  <a href="{{ route('seller.subcategories.index') }}"
+                     class="submenu-link flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-50 {{ request()->routeIs('seller.subcategories.*') ? 'bg-slate-100 text-slate-900' : '' }}">
+                    <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
+                    หมวดหมู่สินค้า
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+
           <a href="{{ route('seller.orders.index') }}" class="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-100 text-slate-900">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M3 7l9-4 9 4-9 4-9-4zm0 6l9 4 9-4m-9 4v6"/></svg>
             Order Management
@@ -58,7 +113,6 @@
         </nav>
       </div>
     </aside>
-
 
     <!-- MAIN -->
     <main class="col-span-12 md:col-span-9 space-y-6">
@@ -89,7 +143,7 @@
                 <th class="px-4 py-3 text-left  font-semibold border-b">ที่อยู่จัดส่ง</th>
                 <th class="px-4 py-3 text-right font-semibold border-b">ยอดรวม</th>
                 <th class="px-4 py-3 text-center font-semibold border-b">สถานะ</th>
-                <th class="px-4 py-3 text-center font-semibold border-b">รายละเอียด</th> {{-- ใหม่ --}}
+                <th class="px-4 py-3 text-center font-semibold border-b">รายละเอียด</th>
               </tr>
             </thead>
             <tbody>
@@ -111,7 +165,7 @@
                     ฿{{ number_format((float) $o->total_amount, 2) }}
                   </td>
 
-                  {{-- สถานะ: dropdown เปลี่ยนสถานะทันที --}}
+                  <!-- สถานะ: dropdown -->
                   <td class="px-4 py-3 border-b text-center">
                     <form method="POST" action="{{ route('seller.orders.status', $o) }}">
                       @csrf
@@ -126,7 +180,7 @@
                     </form>
                   </td>
 
-                  {{-- รายละเอียด: ปุ่มเปิดโมดัลดูรายการสินค้า --}}
+                  <!-- รายละเอียด: โมดัล -->
                   <td class="px-4 py-3 border-b text-center">
                     <button type="button"
                             class="rounded-lg border px-3 py-1.5 text-sm hover:bg-slate-50"
@@ -134,7 +188,7 @@
                       รายละเอียด
                     </button>
 
-                    {{-- โมดัล: ต้องมีความสัมพันธ์ items.product โหลดจาก Controller ด้วย ->with(['items.product']) --}}
+                    <!-- ต้อง with(['items.product']) จาก Controller -->
                     <dialog id="dlg-{{ $o->order_id }}" class="rounded-2xl p-0 w-full max-w-2xl">
                       <form method="dialog">
                         <div class="p-4 sm:p-6 border-b">
@@ -148,7 +202,8 @@
                             <button class="rounded-lg border px-3 py-1.5 text-sm hover:bg-slate-50">ปิด</button>
                           </div>
                           <div class="mt-1 text-sm text-slate-600">
-                            ผู้รับ: {{ $o->shipping_name ?? '—' }} • {{ $o->shipping_phone ?? '—' }}<br>
+                            ชื่อผู้รับ: {{ $o->shipping_name ?? '—' }}<br>
+                            เบอร์โทรศัพท์: {{ $o->shipping_phone ?? '—' }}<br>
                             ที่อยู่: {{ $o->shipping_address ?? '—' }}
                           </div>
                         </div>
@@ -169,9 +224,7 @@
                                   <td class="px-3 py-2">
                                     <div class="flex items-center gap-3">
                                       @php
-                                        $thumb = $it->product?->image_url
-                                          ? asset('storage/'.$it->product->image_url)
-                                          : null;
+                                        $thumb = $it->product?->image_url ? asset('storage/'.$it->product->image_url) : null;
                                       @endphp
                                       @if ($thumb)
                                         <img src="{{ $thumb }}" class="w-10 h-10 rounded object-cover border">
@@ -188,9 +241,7 @@
                                   </td>
                                   <td class="px-3 py-2">฿{{ number_format((float)$it->price, 2) }}</td>
                                   <td class="px-3 py-2">x{{ $it->quantity }}</td>
-                                  <td class="px-3 py-2 text-right">
-                                    ฿{{ number_format((float)$it->price * (int)$it->quantity, 2) }}
-                                  </td>
+                                  <td class="px-3 py-2 text-right">฿{{ number_format((float)$it->price * (int)$it->quantity, 2) }}</td>
                                 </tr>
                               @empty
                                 <tr>
@@ -215,7 +266,7 @@
                 </tr>
               @empty
                 <tr>
-                  <td colspan="6" class="px-4 py-8 text-center text-slate-500">No orders found.</td>
+                  <td colspan="7" class="px-4 py-8 text-center text-slate-500">No orders found.</td>
                 </tr>
               @endforelse
             </tbody>
@@ -236,5 +287,20 @@
       </div>
     </main>
   </div>
+
+  <!-- Toggle submenu -->
+  <script>
+    (function(){
+      const btn = document.querySelector('[data-toggle="submenu-products"]');
+      const menu = document.getElementById('submenu-products');
+      const caret = btn?.querySelector('[data-caret]');
+      function setOpen(open){
+        menu.classList.toggle('hidden', !open);
+        btn?.setAttribute('aria-expanded', open ? 'true' : 'false');
+        if (caret) caret.style.transform = open ? 'rotate(90deg)' : 'rotate(0deg)';
+      }
+      btn?.addEventListener('click', () => setOpen(menu.classList.contains('hidden')));
+    })();
+  </script>
 </body>
 </html>

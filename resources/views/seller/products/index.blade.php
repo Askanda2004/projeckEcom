@@ -43,6 +43,83 @@
     <aside class="col-span-12 md:col-span-3">
       <div class="bg-white rounded-2xl shadow-soft p-4 md:p-5">
         <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-3">Menu</h3>
+
+        <nav class="space-y-1">
+          <!-- Analytics -->
+          <a href="{{ route('seller.reports.index') }}"
+            class="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-100">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
+            </svg>
+            Analytics & Reports
+          </a>
+
+          <!-- Product Management (collapsible with submenu) -->
+          <div class="rounded-2xl">
+            <button type="button"
+                    class="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-slate-100 text-slate-900 hover:bg-slate-200 transition"
+                    data-toggle="submenu-products"
+                    aria-expanded="false" aria-controls="submenu-products">
+              <span class="flex items-center gap-2">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M3 6h18v2H3V6zm0 5h18v2H3v-2zm0 5h18v2H3v-2z"/>
+                </svg>
+                Product Management
+              </span>
+              <svg class="w-4 h-4 transition-transform" data-caret viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/>
+              </svg>
+            </button>
+
+            <div id="submenu-products" class="mt-1 hidden">
+              <ul class="pl-3 border-l border-slate-200 space-y-1">
+                <li>
+                  <a href="{{ route('seller.products.index') }}"
+                    class="submenu-link flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-50">
+                    <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
+                    สินค้าทั้งหมด
+                  </a>
+                </li>
+                <li>
+                  <a href="{{ route('seller.products.create') }}"
+                    class="submenu-link flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-50">
+                    <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
+                    เพิ่มสินค้า
+                  </a>
+                </li>
+                {{-- <li>
+                  <a href="{{ route('seller.categories.index') }}"
+                    class="submenu-link flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-50">
+                    <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
+                    หมวดหมู่สินค้า
+                  </a>
+                </li> --}}
+                <li>
+                  <a href="{{ route('seller.subcategories.index') }}"
+                    class="submenu-link flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-50">
+                    <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
+                    หมวดหมู่สินค้า
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Orders -->
+          <a href="{{ route('seller.orders.index') }}"
+            class="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-100">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M3 7l9-4 9 4-9 4-9-4zm0 6l9 4 9-4m-9 4v6"/>
+            </svg>
+            Order Management
+          </a>
+        </nav>
+      </div>
+    </aside>
+
+    {{-- <aside class="col-span-12 md:col-span-3">
+      <div class="bg-white rounded-2xl shadow-soft p-4 md:p-5">
+        <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-3">Menu</h3>
         <nav class="space-y-1">
           <a href="{{ route('seller.reports.index') }}" class="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-100">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
@@ -58,7 +135,7 @@
           </a>
         </nav>
       </div>
-    </aside>
+    </aside> --}}
 
     <!-- MAIN -->
     <main class="col-span-12 md:col-span-9 space-y-6">
@@ -88,94 +165,127 @@
       @endif
 
       <div class="bg-white rounded-2xl shadow-soft overflow-hidden">
-  <div class="overflow-x-auto">
-    <table class="min-w-full text-sm">
-      <thead class="bg-slate-50 text-slate-600">
-        <tr>
-          <th class="px-4 py-3 text-left font-semibold border-b">รูปภาพสินค้า</th>
-          {{-- <th class="px-4 py-3 text-left font-semibold border-b">รหัสสินค้า</th> --}}
-          <th class="px-4 py-3 text-left font-semibold border-b">ชื่อสินค้า</th>
-          <th class="px-4 py-3 text-left font-semibold border-b">แบรนด์</th>
-          <th class="px-4 py-3 text-left font-semibold border-b">ขนาด</th>
-          <th class="px-4 py-3 text-left font-semibold border-b">สี</th>
-          <th class="px-4 py-3 text-left font-semibold border-b">ราคา</th>
-          <th class="px-4 py-3 text-left font-semibold border-b">จำนวนคงเหลือ</th>
-          <th class="px-4 py-3 text-left font-semibold border-b">หมวดหมู่</th>
-          <th class="px-4 py-3 text-left font-semibold border-b">แก้ไข</th>
-          <th class="px-4 py-3 text-left font-semibold border-b">ลบ</th>
-        </tr>
-      </thead>
-      <tbody>
-        @forelse ($products as $p)
-          <tr class="hover:bg-slate-50">
-            <td class="px-4 py-3 border-b">
-              @if($p->image_url)
-                <img src="{{ asset('storage/'.$p->image_url) }}" alt="{{ $p->name }}" class="w-14 h-14 object-cover rounded-lg border">
-              @else
-                <div class="w-14 h-14 rounded-lg bg-slate-100 border"></div>
-              @endif
-            </td>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm">
+            <thead class="bg-slate-50 text-slate-600">
+              <tr>
+                <th class="px-4 py-3 text-left font-semibold border-b">รูปภาพสินค้า</th>
+                {{-- <th class="px-4 py-3 text-left font-semibold border-b">รหัสสินค้า</th> --}}
+                <th class="px-4 py-3 text-left font-semibold border-b">ชื่อสินค้า</th>
+                <th class="px-4 py-3 text-left font-semibold border-b">แบรนด์</th>
+                <th class="px-4 py-3 text-left font-semibold border-b">ขนาด</th>
+                <th class="px-4 py-3 text-left font-semibold border-b">สี</th>
+                <th class="px-4 py-3 text-left font-semibold border-b">ราคา</th>
+                <th class="px-4 py-3 text-left font-semibold border-b">จำนวนคงเหลือ</th>
+                <th class="px-4 py-3 text-left font-semibold border-b">หมวดหมู่</th>
+                <th class="px-4 py-3 text-left font-semibold border-b">แก้ไข</th>
+                <th class="px-4 py-3 text-left font-semibold border-b">ลบ</th>
+              </tr>
+            </thead>
+            <tbody>
+              @forelse ($products as $p)
+                <tr class="hover:bg-slate-50">
+                  <td class="px-4 py-3 border-b">
+                    @if($p->image_url)
+                      <img src="{{ asset('storage/'.$p->image_url) }}" alt="{{ $p->name }}" class="w-14 h-14 object-cover rounded-lg border">
+                    @else
+                      <div class="w-14 h-14 rounded-lg bg-slate-100 border"></div>
+                    @endif
+                  </td>
 
-            {{-- <td class="px-4 py-3 border-b">{{ $p->product_id }}</td>  ← ลบออก --}}
+                  {{-- <td class="px-4 py-3 border-b">{{ $p->product_id }}</td>  ← ลบออก --}}
 
-            <td class="px-4 py-3 border-b font-medium">{{ $p->name }}</td>
+                  <td class="px-4 py-3 border-b font-medium">{{ $p->name }}</td>
 
-            <td class="px-4 py-3 border-b text-slate-600">
-              <span title="{{ $p->description }}">{{ \Illuminate\Support\Str::limit($p->description, 60) }}</span>
-            </td>
+                  <td class="px-4 py-3 border-b text-slate-600">
+                    <span title="{{ $p->description }}">{{ \Illuminate\Support\Str::limit($p->description, 60) }}</span>
+                  </td>
 
-            <td class="px-4 py-3 border-b">{{ $p->size ?? '—' }}</td>
-            <td class="px-4 py-3 border-b">{{ $p->color ?? '—' }}</td>   {{-- ✅ เพิ่ม --}}
+                  <td class="px-4 py-3 border-b">{{ $p->size ?? '—' }}</td>
+                  <td class="px-4 py-3 border-b">{{ $p->color ?? '—' }}</td>   {{-- ✅ เพิ่ม --}}
 
-            <td class="px-4 py-3 border-b">฿{{ number_format((float) $p->price, 2) }}</td>
+                  <td class="px-4 py-3 border-b">฿{{ number_format((float) $p->price, 2) }}</td>
 
-            <td class="px-4 py-3 border-b">
-              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs
-                  {{ ($p->stock_quantity ?? 0) > 5 ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700' }}">
-                {{ $p->stock_quantity ?? 0 }}
-              </span>
-            </td>
+                  <td class="px-4 py-3 border-b">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs
+                        {{ ($p->stock_quantity ?? 0) > 5 ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700' }}">
+                      {{ $p->stock_quantity ?? 0 }}
+                    </span>
+                  </td>
 
-            <td class="px-4 py-3 border-b">{{ $p->category->category_name ?? '—' }}</td>
+                  <td class="px-4 py-3 border-b">{{ $p->category->category_name ?? '—' }}</td>
 
-            <td class="px-4 py-3 border-b">
-              <a href="{{ route('seller.products.edit', $p) }}"
-                class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50">Edit</a>
-            </td>
+                  <td class="px-4 py-3 border-b">
+                    <a href="{{ route('seller.products.edit', $p) }}"
+                      class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50">Edit</a>
+                  </td>
 
-            <td class="px-4 py-3 border-b">
-              <form method="POST" action="{{ route('seller.products.destroy', $p) }}"
-                    onsubmit="return confirm('Delete this product?')">
-                @csrf
-                @method('DELETE')
-                <button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-rose-200 text-rose-700 hover:bg-rose-50">Delete</button>
-              </form>
-            </td>
-          </tr>
+                  <td class="px-4 py-3 border-b">
+                    <form method="POST" action="{{ route('seller.products.destroy', $p) }}"
+                          onsubmit="return confirm('Delete this product?')">
+                      @csrf
+                      @method('DELETE')
+                      <button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-rose-200 text-rose-700 hover:bg-rose-50">Delete</button>
+                    </form>
+                  </td>
+                </tr>
 
-        @empty
-          <tr>
-            <td colspan="10" class="px-4 py-8 text-center text-slate-500">No products found.</td>
-          </tr>
-        @endforelse
-      </tbody>
-    </table>
-  </div>
+              @empty
+                <tr>
+                  <td colspan="10" class="px-4 py-8 text-center text-slate-500">No products found.</td>
+                </tr>
+              @endforelse
+            </tbody>
+          </table>
+        </div>
 
   <!-- Pagination -->
-  <div class="p-4 sm:p-6 border-t border-slate-100">
-    <div class="flex items-center justify-between">
-      <div class="text-xs text-slate-500">
-        Showing <span class="font-medium">{{ $products->firstItem() ?? 0 }}</span> to
-        <span class="font-medium">{{ $products->lastItem() ?? 0 }}</span> of
-        <span class="font-medium">{{ $products->total() }}</span> results
+        <div class="p-4 sm:p-6 border-t border-slate-100">
+          <div class="flex items-center justify-between">
+            <div class="text-xs text-slate-500">
+              Showing <span class="font-medium">{{ $products->firstItem() ?? 0 }}</span> to
+              <span class="font-medium">{{ $products->lastItem() ?? 0 }}</span> of
+              <span class="font-medium">{{ $products->total() }}</span> results
+            </div>
+            {{ $products->links() }}
+          </div>
+        </div>
       </div>
-      {{ $products->links() }}
-    </div>
-  </div>
-</div>
-
     </main>
+
+    <!-- Toggle & active states -->
+    <script>
+      (function(){
+        const btn = document.querySelector('[data-toggle="submenu-products"]');
+        const menu = document.getElementById('submenu-products');
+        const caret = btn?.querySelector('[data-caret]');
+
+        function setOpen(open){
+          menu.classList.toggle('hidden', !open);
+          btn?.setAttribute('aria-expanded', open ? 'true' : 'false');
+          if (caret) caret.style.transform = open ? 'rotate(90deg)' : 'rotate(0deg)';
+        }
+
+        btn?.addEventListener('click', () => setOpen(menu.classList.contains('hidden')));
+
+        // mark active by URL & auto-open if any child matches
+        const links = menu?.querySelectorAll('.submenu-link') || [];
+        const currentPath = window.location.pathname;
+        let hasActiveChild = false;
+
+        links.forEach(a => {
+          try {
+            const to = new URL(a.href, window.location.origin).pathname;
+            if (currentPath === to || currentPath.startsWith(to)) {
+              a.classList.add('bg-slate-100','text-slate-900');
+              hasActiveChild = true;
+            }
+          } catch (e) {}
+        });
+
+        if (hasActiveChild) setOpen(true);
+      })();
+    </script>
   </div>
 </body>
 </html>
