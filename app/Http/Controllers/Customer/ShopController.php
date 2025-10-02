@@ -5,32 +5,94 @@ namespace App\Http\Controllers\Customer;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Product;
+use App\Models\Category;
 use App\Models\Cart;
 use App\Models\CartItem;
 
 class ShopController extends Controller
 {
-    /** หน้าร้าน (ใส่ของคุณเอง) */
     public function shop(Request $request)
     {
-        $q = trim($request->get('q', ''));
+        // รับพารามิเตอร์
+        $q           = trim($request->get('q', ''));
+        $categoryId  = $request->filled('category') ? (int) $request->get('category') : null;
 
+        // หมวดหมู่ทั้งหมด + จำนวนสินค้าในแต่ละหมวด (เฉพาะสินค้าที่อยู่ในระบบ)
+        $categories = Category::query()
+            ->withCount(['products as products_count' => function ($s) use ($q) {
+                // นับแบบเคารพคำค้นหา (จะได้จำนวนที่ตรงกับผลลัพธ์ตอนนี้)
+                if ($q !== '') {
+                    $s->where(function ($w) use ($q) {
+                        $w->where('name','like',"%{$q}%")
+                          ->orWhere('description','like',"%{$q}%")
+                          ->orWhere('size','like',"%{$q}%")
+                          ->orWhere('color','like',"%{$q}%");
+                    });
+                }
+            }])
+            ->orderBy('category_name')
+            ->get();
+
+        // Query หลักของสินค้า
         $products = Product::query()
+            ->with(['images','category'])
             ->when($q !== '', function ($s) use ($q) {
                 $s->where(function ($w) use ($q) {
-                    $w->where('name', 'like', "%{$q}%")
-                      ->orWhere('description', 'like', "%{$q}%")
-                      ->orWhere('size', 'like', "%{$q}%")
-                      ->orWhere('description', 'like', "%{$q}%")
-                      ->orWhere('color', 'like', "%{$q}%");
+                    $w->where('name','like',"%{$q}%")
+                      ->orWhere('description','like',"%{$q}%")
+                      ->orWhere('size','like',"%{$q}%")
+                      ->orWhere('color','like',"%{$q}%");
                 });
             })
-            ->orderByDesc('product_id')   // ใช้คีย์จริงของตาราง
-            ->paginate(12)
+            ->when($categoryId, function ($s) use ($categoryId) {
+                $s->where('category_id', $categoryId);
+            })
+            ->latest()
+            ->paginate(16)
             ->withQueryString();
 
-        return view('customer.shop', compact('products', 'q'));
+        return view('customer.shop', [
+            'products'        => $products,
+            'categories'      => $categories,
+            'currentCategory' => $categoryId,
+            'q'               => $q,
+        ]);
     }
+
+    // ถ้าคุณมีหน้าแสดงรายละเอียดสินค้า
+    public function show(Product $product)
+    {
+        $product->load(['images','category']);
+        $related = Product::query()
+            ->where('product_id','!=',$product->product_id)
+            ->when($product->category_id, fn($q)=>$q->where('category_id',$product->category_id))
+            ->latest()->take(8)
+            ->with(['images'])
+            ->get();
+
+        return view('customer.product-show', compact('product','related'));
+    }
+    /** หน้าร้าน (ใส่ของคุณเอง) */
+    // public function shop(Request $request)
+    // {
+    //     $q = trim($request->get('q', ''));
+
+    //     $products = Product::query()
+    //         ->when($q !== '', function ($s) use ($q) {
+    //             $s->where(function ($w) use ($q) {
+    //                 $w->where('name', 'like', "%{$q}%")
+    //                   ->orWhere('description', 'like', "%{$q}%")
+    //                   ->orWhere('size', 'like', "%{$q}%")
+    //                   ->orWhere('description', 'like', "%{$q}%")
+    //                   ->orWhere('color', 'like', "%{$q}%");
+    //             });
+    //         })
+    //         ->orderByDesc('product_id')   // ใช้คีย์จริงของตาราง
+    //         ->paginate(12)
+    //         ->withQueryString();
+
+    //     return view('customer.shop', compact('products', 'q'));
+    // }
 
     /** ตะกร้า: โหลดจาก DB -> สร้าง array ให้ view + sync session เผื่อมีแก้ไขนอกหน้า cart */
     public function cart()

@@ -102,8 +102,8 @@ Route::middleware(['auth','verified'])->group(function () {
     Route::middleware(['auth','verified','role:customer'])
     ->prefix('customer')->name('customer.')
     ->group(function () {
-        // Route::get('/shop',  [ShopController::class, 'shop'])->name('shop');
-        Route::get('/shop', [CustomerProductController::class, 'index'])->name('shop');
+        Route::get('/shop',  [ShopController::class, 'shop'])->name('shop');
+        // Route::get('/shop', [CustomerProductController::class, 'index'])->name('shop');
 
         Route::get('/cart',  [ShopController::class, 'cart'])->name('cart');
 
