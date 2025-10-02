@@ -13,6 +13,7 @@ use App\Http\Controllers\Seller\SubcategoryController as SellerSubcategoryContro
 use App\Http\Controllers\Customer\ShopController;
 use App\Http\Controllers\Customer\CheckoutController;
 use App\Http\Controllers\Customer\ProductController as CustomerProductController;
+use App\Http\Controllers\Customer\OrderController as CustomerOrderController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -123,24 +124,9 @@ Route::middleware(['auth','verified'])->group(function () {
 
         Route::get('/products/{product:product_id}', [CustomerProductController::class, 'show'])
         ->name('products.show');
+
+        Route::get('/orders', [CustomerOrderController::class, 'index'])->name('orders.index');
     });
-    // Route::middleware(['auth','verified','role:customer'])
-    // ->prefix('customer')
-    // ->name('customer.')
-    // ->group(function () {
-
-    //     // หน้าร้าน + ตะกร้า (คงของเดิม)
-    //     Route::get('/shop',                [ShopController::class, 'shop'])->name('shop');
-    //     Route::get('/cart',                [ShopController::class, 'cart'])->name('cart');
-    //     Route::post('/cart/add/{product_id}', [ShopController::class, 'addToCart'])->name('cart.add');
-    //     Route::patch('/cart/update/{id}',  [ShopController::class, 'updateCart'])->name('cart.update');
-    //     Route::delete('/cart/remove/{id}', [ShopController::class, 'removeFromCart'])->name('cart.remove');
-    //     Route::delete('/cart/clear',       [ShopController::class, 'clearCart'])->name('cart.clear');
-
-    //     // Checkout (Controller เดียว)
-    //     Route::get('/checkout',  [CheckoutController::class, 'create'])->name('checkout');
-    //     Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
-    // });
     
 
     // อนุญาตหลาย role

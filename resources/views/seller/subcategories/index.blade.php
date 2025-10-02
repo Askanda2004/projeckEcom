@@ -117,7 +117,7 @@
                     <tr class="text-left text-slate-500 border-b">
                       <th class="py-2">รูป</th>
                       <th class="py-2">สินค้า</th>
-                      <th class="py-2">รายละเอียด</th>
+                      <th class="py-2">แบรนด์</th>
                       <th class="py-2">ขนาด</th>
                       <th class="py-2">สี</th>
                       <th class="py-2">สต็อก</th>
