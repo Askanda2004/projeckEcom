@@ -287,9 +287,9 @@
                     </div>
 
                     <button type="submit"
-                            class="flex-1 rounded-lg {{ $stock>0 ? 'bg-slate-900 hover:bg-slate-800' : 'bg-slate-300 cursor-not-allowed' }} text-white py-2.5 transition"
+                            class="flex-1 rounded-lg {{ $stock>0 ? 'bg-slate-900 hover:bg-slate-800' : 'bg-slate-300 cursor-not-allowed' }} text-white py-1.5 transition"
                             {{ $stock<=0 ? 'disabled' : '' }}>
-                      หยิบใส่ตะกร้า
+                      เพิ่มตะกร้า
                     </button>
                   </form>
                 </div>

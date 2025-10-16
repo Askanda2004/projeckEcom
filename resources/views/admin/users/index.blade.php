@@ -61,41 +61,58 @@
       <aside class="col-span-12 md:col-span-3 lg:col-span-3">
         <div class="bg-white rounded-2xl shadow-soft p-4 md:p-5">
           <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-3">Navigation</h3>
+
           <nav class="space-y-1">
+
+            {{-- 🔹 จัดการผู้ใช้ทั้งหมด --}}
             <a href="{{ route('admin.users.index') }}"
-               class="{{ $linkBase }} {{ $activeAll ? $activeCls : '' }}">
+              class="{{ $linkBase }} {{ $activeAll ? $activeCls : '' }}">
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
               </svg>
               Manage Users (All)
             </a>
 
+            {{-- 🔹 Users Customer --}}
             <a href="{{ route('admin.users.byRole','customer') }}"
-               class="{{ $linkBase }} {{ $activeCustomer ? $activeCls : '' }}">
+              class="{{ $linkBase }} {{ $activeCustomer ? $activeCls : '' }}">
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 12c2.7 0 4.88-2.18 4.88-4.88S14.7 2.24 12 2.24 7.12 4.42 7.12 7.12 9.3 12 12 12zm0 2.4c-3.25 0-9.6 1.63-9.6 4.88V22h19.2v-2.72c0-3.25-6.35-4.88-9.6-4.88z"/>
               </svg>
               Users Customer
             </a>
 
+            {{-- 🔹 Users Seller --}}
             <a href="{{ route('admin.users.byRole','seller') }}"
-               class="{{ $linkBase }} {{ $activeSeller ? $activeCls : '' }}">
+              class="{{ $linkBase }} {{ $activeSeller ? $activeCls : '' }}">
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M3 6l3 7h11l3-7H3zm3 9c-1.66 0-3 1.34-3 3v1h18v-1c0-1.66-1.34-3-3-3H6z"/>
               </svg>
               Users Seller
             </a>
 
+            {{-- 🔹 Users Admin --}}
             <a href="{{ route('admin.users.byRole','admin') }}"
-               class="{{ $linkBase }} {{ $activeAdmin ? $activeCls : '' }}">
+              class="{{ $linkBase }} {{ $activeAdmin ? $activeCls : '' }}">
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 11.99V5.5l6 2.67V11c0 4.02-2.68 7.96-6 9.27V12.99z"/>
               </svg>
               Users Admin
             </a>
+
+            {{-- ✅ เพิ่มเมนูตรวจสอบการชำระเงิน --}}
+            <a href="{{ route('admin.payments.index') }}"
+              class="{{ request()->routeIs('admin.payments.*') ? $activeCls : $linkBase }}">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M21 7H3V5h18v2zm0 4H3v8h18v-8zm-6 3h2v2h-2v-2z"/>
+              </svg>
+              ตรวจสอบการชำระเงิน
+            </a>
+
           </nav>
         </div>
       </aside>
+
 
       <!-- MAIN -->
       <main class="col-span-12 md:col-span-9 lg:col-span-9 space-y-6">

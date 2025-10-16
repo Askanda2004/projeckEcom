@@ -88,13 +88,6 @@
                     เพิ่มสินค้า
                   </a>
                 </li>
-                {{-- <li>
-                  <a href="{{ route('seller.categories.index') }}"
-                     class="submenu-link flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-50 {{ request()->routeIs('seller.categories.*') ? 'bg-slate-100 text-slate-900' : '' }}">
-                    <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
-                    หมวดหมู่สินค้า
-                  </a>
-                </li> --}}
                 <li>
                   <a href="{{ route('seller.subcategories.index') }}"
                      class="submenu-link flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-50 {{ request()->routeIs('seller.subcategories.*') ? 'bg-slate-100 text-slate-900' : '' }}">
@@ -142,15 +135,33 @@
                 <th class="px-4 py-3 text-left  font-semibold border-b">เบอร์โทร</th>
                 <th class="px-4 py-3 text-left  font-semibold border-b">ที่อยู่จัดส่ง</th>
                 <th class="px-4 py-3 text-right font-semibold border-b">ยอดรวม</th>
-                <th class="px-4 py-3 text-center font-semibold border-b">สถานะ</th>
+                <!-- ✅ คอลัมน์ใหม่: สถานะชำระเงิน -->
+                {{-- <th class="px-4 py-3 text-center font-semibold border-b">ชำระเงิน</th> --}}
+                <th class="px-4 py-3 text-center font-semibold border-b">สถานะคำสั่งซื้อ</th>
                 <th class="px-4 py-3 text-center font-semibold border-b">รายละเอียด</th>
               </tr>
             </thead>
             <tbody>
               @forelse ($orders as $o)
+                @php
+                  $p = $o->payment ?? null;
+                  $pStatus = $p->status ?? 'unpaid'; // unpaid|pending|verified|rejected
+                  $badgeMap = [
+                    'unpaid'   => 'bg-slate-100 text-slate-700 border border-slate-200',
+                    'pending'  => 'bg-amber-50 text-amber-700 border border-amber-200',
+                    'verified' => 'bg-emerald-50 text-emerald-700 border border-emerald-200',
+                    'rejected' => 'bg-rose-50 text-rose-700 border border-rose-200',
+                  ];
+                  $labelMap = [
+                    'unpaid'   => 'ยังไม่ชำระ',
+                    'pending'  => 'รอตรวจ',
+                    'verified' => 'ชำระแล้ว',
+                    'rejected' => 'สลิปถูกปฏิเสธ',
+                  ];
+                @endphp
                 <tr class="hover:bg-slate-50">
                   <td class="px-4 py-3 border-b">
-                    {{ \Illuminate\Support\Carbon::parse($o->order_date)->format('d/m/Y H:i') }}
+                    {{ \Illuminate\Support\Carbon::parse($o->order_date)->timezone('Asia/Bangkok')->format('d/m/Y H:i') }}
                   </td>
                   <td class="px-4 py-3 border-b font-medium">
                     {{ $o->shipping_name ?? '—' }}
@@ -165,22 +176,39 @@
                     ฿{{ number_format((float) $o->total_amount, 2) }}
                   </td>
 
-                  <!-- สถานะ: dropdown -->
+                  <!-- ✅ แสดงสถานะชำระเงิน + ปุ่มดูสลิป -->
+                  {{-- <td class="px-4 py-3 border-b text-center">
+                    <div class="flex items-center justify-center gap-2">
+                      <span class="text-[11px] px-2 py-0.5 rounded-full {{ $badgeMap[$pStatus] ?? $badgeMap['unpaid'] }}">
+                        {{ $labelMap[$pStatus] ?? $labelMap['unpaid'] }}
+                      </span>
+                      @if($p && $p->slip_path)
+                        <a href="{{ asset('storage/'.$p->slip_path) }}" target="_blank"
+                           class="text-xs underline text-slate-600 hover:text-slate-900">ดูสลิป</a>
+                      @endif
+                    </div>
+                  </td> --}}
+
+                  <!-- สถานะคำสั่งซื้อ (ของร้าน) -->
                   <td class="px-4 py-3 border-b text-center">
                     <form method="POST" action="{{ route('seller.orders.status', $o) }}">
                       @csrf
                       @method('PATCH')
                       <select name="status"
                               class="rounded-lg border px-2 py-1 text-sm focus:border-primary focus:ring-2 focus:ring-blue-100"
-                              onchange="this.form.submit()">
+                              onchange="this.form.submit()"
+                              {{ ($pStatus !== 'verified') ? '' : '' }}>
                         @foreach ($statusMap as $value => $label)
                           <option value="{{ $value }}" @selected($o->status === $value)>{{ $label }}</option>
                         @endforeach
                       </select>
+                      {{-- @if($pStatus !== 'verified')
+                        <div class="mt-1 text-[10px] text-slate-400">* สามารถอัปเดตสถานะได้ แม้อยู่ระหว่างตรวจสลิป</div>
+                      @endif --}}
                     </form>
                   </td>
 
-                  <!-- รายละเอียด: โมดัล -->
+                  <!-- รายละเอียด -->
                   <td class="px-4 py-3 border-b text-center">
                     <button type="button"
                             class="rounded-lg border px-3 py-1.5 text-sm hover:bg-slate-50"
@@ -188,7 +216,7 @@
                       รายละเอียด
                     </button>
 
-                    <!-- ต้อง with(['items.product']) จาก Controller -->
+                    <!-- Modal -->
                     <dialog id="dlg-{{ $o->order_id }}" class="rounded-2xl p-0 w-full max-w-2xl">
                       <form method="dialog">
                         <div class="p-4 sm:p-6 border-b">
@@ -196,16 +224,42 @@
                             <h3 class="font-semibold">
                               รายละเอียดคำสั่งซื้อ #{{ $o->order_id }}
                               <span class="ml-2 text-sm text-slate-500">
-                                ({{ \Illuminate\Support\Carbon::parse($o->order_date)->format('d/m/Y H:i') }})
+                                ({{ \Illuminate\Support\Carbon::parse($o->order_date)->timezone('Asia/Bangkok')->format('d/m/Y H:i') }})
                               </span>
                             </h3>
                             <button class="rounded-lg border px-3 py-1.5 text-sm hover:bg-slate-50">ปิด</button>
                           </div>
                           <div class="mt-1 text-sm text-slate-600">
-                            ชื่อผู้รับ: {{ $o->shipping_name ?? '—' }}<br>
-                            เบอร์โทรศัพท์: {{ $o->shipping_phone ?? '—' }}<br>
+                            ชื่อผู้รับ: {{ $o->shipping_name ?? '—' }} • {{ $o->shipping_phone ?? '—' }}<br>
                             ที่อยู่: {{ $o->shipping_address ?? '—' }}
                           </div>
+
+                          <!-- ✅ กล่องสรุปการชำระเงิน -->
+                          {{-- <div class="mt-3 rounded-xl border p-3 bg-slate-50">
+                            <div class="text-sm font-medium mb-1">การชำระเงิน</div>
+                            <div class="flex flex-wrap items-center gap-2">
+                              <span class="text-[11px] px-2 py-0.5 rounded-full {{ $badgeMap[$pStatus] ?? $badgeMap['unpaid'] }}">
+                                {{ $labelMap[$pStatus] ?? $labelMap['unpaid'] }}
+                              </span>
+                              @if($p && $p->paid_at)
+                                <span class="text-xs text-slate-500">
+                                  เวลาโอน: {{ \Illuminate\Support\Carbon::parse($p->paid_at)->timezone('Asia/Bangkok')->format('d/m/Y H:i') }}
+                                </span>
+                              @endif
+                              @if($p && $p->slip_path)
+                                <a href="{{ asset('storage/'.$p->slip_path) }}" target="_blank"
+                                   class="text-xs underline text-slate-600 hover:text-slate-900">ดูสลิป</a>
+                              @endif
+                              @if($p && $p->verified_at && $p->status === 'verified')
+                                <span class="text-xs text-emerald-700">
+                                  (ตรวจโดยแอดมินเมื่อ {{ \Illuminate\Support\Carbon::parse($p->verified_at)->timezone('Asia/Bangkok')->format('d/m/Y H:i') }})
+                                </span>
+                              @endif
+                              @if($p && $p->rejected_reason && $p->status === 'rejected')
+                                <div class="w-full text-xs text-rose-700">หมายเหตุปฏิเสธ: {{ $p->rejected_reason }}</div>
+                              @endif
+                            </div>
+                          </div> --}}
                         </div>
 
                         <div class="p-4 sm:p-6 overflow-x-auto">
@@ -232,7 +286,7 @@
                                         <div class="w-10 h-10 rounded bg-slate-100 border"></div>
                                       @endif
                                       <div>
-                                        <div class="font-medium">{{ $it->product->name ?? '—' }}</div>
+                                        <div class="font-medium">{{ $it->product->name ?? $it->name ?? '—' }}</div>
                                         <div class="text-xs text-slate-500">
                                           ขนาด: {{ $it->product->size ?? '—' }} • สี: {{ $it->product->color ?? '—' }}
                                         </div>
@@ -266,7 +320,7 @@
                 </tr>
               @empty
                 <tr>
-                  <td colspan="7" class="px-4 py-8 text-center text-slate-500">No orders found.</td>
+                  <td colspan="8" class="px-4 py-8 text-center text-slate-500">No orders found.</td>
                 </tr>
               @endforelse
             </tbody>

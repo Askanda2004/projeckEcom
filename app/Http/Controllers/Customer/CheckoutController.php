@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Customer;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Facades\Storage;
 use App\Models\Product;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -13,13 +13,13 @@ use App\Models\OrderItem;
 class CheckoutController extends Controller
 {
     /**
-     * สรุปรายการจาก DB cart_items + products แล้วส่งให้หน้า checkout
+     * แสดงหน้า Checkout (โหลดตะกร้าจาก DB)
      */
     public function create()
     {
         $userId = auth()->id();
 
-        // ดึงตะกร้าของผู้ใช้จาก DB (join products เพื่อได้ข้อมูลครบ)
+        // ดึงตะกร้าพร้อมสินค้า
         $items = DB::table('carts')
             ->join('cart_items', 'cart_items.cart_id', '=', 'carts.cart_id')
             ->join('products', 'products.product_id', '=', 'cart_items.product_id')
@@ -27,16 +27,15 @@ class CheckoutController extends Controller
             ->select([
                 'cart_items.product_id',
                 'cart_items.quantity',
-                'cart_items.price',          // snapshot ตอนใส่ตะกร้า
+                'cart_items.price',
                 'cart_items.size',
                 'cart_items.color',
                 'cart_items.image_url',
-                'products.name as product_name', // ✅ จะใช้ชื่อสินค้านี้
+                'products.name as product_name',
                 'products.seller_id',
             ])
             ->get();
 
-        // map ให้ view ใช้เหมือนเดิม (ตัวแปร $cart)
         $cart = $items->map(function ($row) {
             return [
                 'product_id' => (int) $row->product_id,
@@ -59,20 +58,16 @@ class CheckoutController extends Controller
     }
 
     /**
-     * วางคำสั่งซื้อ:
-     * - ตรวจฟอร์มที่อยู่จัดส่ง
-     * - โหลดตะกร้าจาก DB
-     * - แยกตาม seller_id
-     * - สร้าง orders + order_items
-     * - ตัดสต็อก (transaction-safe)
-     * - ล้าง cart_items ของผู้ใช้
+     * สั่งซื้อสินค้า (สร้าง order + order_items)
      */
     public function store(Request $request)
     {
+        // ✅ ตรวจฟอร์ม + ไฟล์สลิป
         $data = $request->validate([
             'shipping_name'    => ['required','string','max:255'],
             'shipping_phone'   => ['required','string','max:30'],
             'shipping_address' => ['required','string','max:2000'],
+            'payment_slip'     => ['nullable','image','max:2048'], // สลิปโอนเงิน
             'confirm'          => ['required','accepted'],
         ], [
             'confirm.accepted' => 'กรุณาติ๊กยืนยันการสั่งซื้อ',
@@ -80,7 +75,7 @@ class CheckoutController extends Controller
 
         $userId = auth()->id();
 
-        // โหลด cart จาก DB
+        // ดึงข้อมูลตะกร้า
         $items = DB::table('carts')
             ->join('cart_items', 'cart_items.cart_id', '=', 'carts.cart_id')
             ->join('products', 'products.product_id', '=', 'cart_items.product_id')
@@ -88,8 +83,8 @@ class CheckoutController extends Controller
             ->select([
                 'cart_items.product_id',
                 'cart_items.quantity',
-                'cart_items.price',      // snapshot ตอน add to cart
-                'products.name as product_name', // ✅ ใช้ชื่อนี้ใส่ลง order_items.name
+                'cart_items.price',
+                'products.name as product_name',
                 'products.seller_id',
                 'products.stock_quantity',
             ])
@@ -99,20 +94,25 @@ class CheckoutController extends Controller
             return redirect()->route('customer.cart')->with('error', 'ตะกร้าว่าง');
         }
 
-        // ตรวจว่า product ทุกตัวมี seller_id
+        // ตรวจ seller_id ของสินค้าทั้งหมด
         foreach ($items as $row) {
             if (!$row->seller_id) {
-                return back()->with('error', "สินค้า \"{$row->product_name}\" ยังไม่ถูกผูกกับผู้ขาย (seller_id)");
+                return back()->with('error', "สินค้า \"{$row->product_name}\" ยังไม่ผูกกับผู้ขาย (seller_id)");
             }
         }
 
-        // จัดกลุ่มตาม seller_id
+        // กลุ่มสินค้าแยกตาม seller_id
         $bySeller = $items->groupBy('seller_id');
 
-        DB::transaction(function () use ($bySeller, $data, $userId) {
-            foreach ($bySeller as $sellerId => $group) {
+        // ✅ ถ้ามีอัปโหลดสลิป เก็บลง storage/public/payment_slips
+        $slipPath = null;
+        if ($request->hasFile('payment_slip')) {
+            $slipPath = $request->file('payment_slip')->store('payment_slips', 'public');
+        }
 
-                // lock สินค้าที่จะตัดสต็อก
+        DB::transaction(function () use ($bySeller, $data, $userId, $slipPath) {
+            foreach ($bySeller as $sellerId => $group) {
+                // ล็อกสินค้าไว้กัน race condition
                 $productIds = $group->pluck('product_id')->all();
                 $lockProducts = Product::whereIn('product_id', $productIds)
                     ->lockForUpdate()
@@ -122,64 +122,57 @@ class CheckoutController extends Controller
                 // ตรวจสต็อก
                 foreach ($group as $row) {
                     $p = $lockProducts[$row->product_id] ?? null;
-                    if (!$p) {
+                    if (!$p || $p->stock_quantity < $row->quantity) {
                         throw \Illuminate\Validation\ValidationException::withMessages([
-                            'cart' => "ไม่พบสินค้า (ID: {$row->product_id})",
-                        ]);
-                    }
-                    if ((int)$p->stock_quantity < (int)$row->quantity) {
-                        throw \Illuminate\Validation\ValidationException::withMessages([
-                            'cart' => "สต็อกสินค้า \"{$p->name}\" ไม่พอ (คงเหลือ {$p->stock_quantity}, ต้องการ {$row->quantity})",
+                            'cart' => "สินค้า {$row->product_name} สต็อกไม่เพียงพอ",
                         ]);
                     }
                 }
 
-                // ยอดรวมของผู้ขายแต่ละคน
-                $total = $group->sum(fn($r) => (float)$r->price * (int)$r->quantity);
+                // รวมยอดแต่ละ seller
+                $total = $group->sum(fn($r) => $r->price * $r->quantity);
 
-                // สร้าง order 1 ใบสำหรับ seller รายนี้
+                // ✅ สร้าง order
                 $order = Order::create([
-                    'user_id'          => auth()->id(),
+                    'user_id'          => $userId,
                     'seller_id'        => $sellerId,
-                    'order_date'       => now(),
-                    'status'           => 'pending',
+                    'order_date'       => now('Asia/Bangkok'),
+                    'status'           => 'pending',           // ยังไม่ตรวจสอบ
+                    'payment_status'   => 'pending',           // รอการตรวจสอบ
+                    'payment_slip'     => $slipPath,           // เก็บ path สลิป
                     'total_amount'     => $total,
                     'shipping_name'    => $data['shipping_name'],
                     'shipping_phone'   => $data['shipping_phone'],
                     'shipping_address' => $data['shipping_address'],
                 ]);
 
-                // ใส่รายการ + ตัดสต็อก
+                // ✅ สร้าง order_items
                 foreach ($group as $row) {
                     OrderItem::create([
                         'order_id'   => $order->order_id,
-                        'product_id' => (int) $row->product_id,
-                        'name'       => $row->product_name, // ✅ เพิ่มบรรทัดนี้เพื่อกัน error 1364
-                        'quantity'   => (int) $row->quantity,
-                        'price'      => (float) $row->price,
+                        'product_id' => $row->product_id,
+                        'name'       => $row->product_name,
+                        'quantity'   => $row->quantity,
+                        'price'      => $row->price,
+                        'seller_id'  => $sellerId,
                     ]);
 
-                    // ตัดสต็อกแบบกันติดลบ
-                    $affected = Product::where('product_id', (int)$row->product_id)
-                        ->where('stock_quantity', '>=', (int)$row->quantity)
+                    // ตัดสต็อก
+                    Product::where('product_id', $row->product_id)
                         ->decrement('stock_quantity', (int)$row->quantity);
-
-                    if ($affected === 0) {
-                        throw \Illuminate\Validation\ValidationException::withMessages([
-                            'cart' => "ตัดสต็อกไม่สำเร็จ: ID {$row->product_id}",
-                        ]);
-                    }
                 }
             }
 
-            // ล้าง cart_items ของผู้ใช้เมื่อสั่งซื้อทุกใบสำเร็จ
+            // ✅ ล้างตะกร้าเมื่อสั่งซื้อเสร็จ
             DB::table('cart_items')
-              ->whereIn('cart_id', function ($q) use ($userId) {
-                  $q->select('cart_id')->from('carts')->where('user_id', $userId);
-              })->delete();
+                ->whereIn('cart_id', function ($q) use ($userId) {
+                    $q->select('cart_id')->from('carts')->where('user_id', $userId);
+                })
+                ->delete();
         });
 
-        return redirect()->route('customer.shop')
-            ->with('status', 'สั่งซื้อสำเร็จแล้ว! ระบบสร้างออเดอร์แยกตามผู้ขายให้เรียบร้อย');
+        return redirect()
+            ->route('customer.orders.index')
+            ->with('status', 'สั่งซื้อสำเร็จ! โปรดรอเจ้าหน้าที่ตรวจสอบการชำระเงิน');
     }
 }

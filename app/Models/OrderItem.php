@@ -10,7 +10,8 @@ class OrderItem extends Model
     public $incrementing = true;
     protected $keyType = 'int';
 
-    protected $fillable = ['order_id','product_id','name','quantity','price'];
+    protected $fillable = ['order_id','product_id','name','quantity','price',
+                            'size','color','image','seller_id',];
 
     public function order()   { return $this->belongsTo(Order::class, 'order_id', 'order_id'); }
     public function product() { return $this->belongsTo(Product::class, 'product_id', 'product_id'); }

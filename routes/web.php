@@ -46,6 +46,11 @@ Route::middleware(['auth','verified'])->group(function () {
         Route::get   ('/users/{user}/edit', [UserManagementController::class, 'edit'])->name('users.edit');
         Route::patch ('/users/{user}',      [UserManagementController::class, 'update'])->name('users.update');
         Route::delete('/users/{user}',      [UserManagementController::class, 'destroy'])->name('users.destroy');
+
+        Route::get('/payments', [\App\Http\Controllers\Admin\PaymentController::class, 'index'])->name('payments.index');
+        Route::get('/payments/{order}', [\App\Http\Controllers\Admin\PaymentController::class, 'show'])->name('payments.show');
+        Route::patch('/payments/{order}/verify', [\App\Http\Controllers\Admin\PaymentController::class, 'verify'])->name('payments.verify');
+        Route::patch('/payments/{order}/reject', [\App\Http\Controllers\Admin\PaymentController::class, 'reject'])->name('payments.reject');
     });
 
     // เฉพาะ Seller

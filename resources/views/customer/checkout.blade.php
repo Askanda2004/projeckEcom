@@ -105,9 +105,10 @@
         <h2 class="text-base font-semibold">ที่อยู่จัดส่ง</h2>
       </div>
 
-      <form method="POST" action="{{ route('customer.checkout.place') }}" class="p-5 space-y-4">
+      <form method="POST" action="{{ route('customer.checkout.place') }}" enctype="multipart/form-data" class="p-5 space-y-4">
         @csrf
 
+        {{-- ชื่อผู้รับ --}}
         <div>
           <label class="block text-sm font-medium">ชื่อผู้รับ</label>
           <input
@@ -118,6 +119,7 @@
           @error('shipping_name') <p class="text-sm text-rose-600 mt-1">{{ $message }}</p> @enderror
         </div>
 
+        {{-- เบอร์โทร --}}
         <div>
           <label class="block text-sm font-medium">เบอร์โทร</label>
           <input
@@ -129,6 +131,7 @@
           @error('shipping_phone') <p class="text-sm text-rose-600 mt-1">{{ $message }}</p> @enderror
         </div>
 
+        {{-- ที่อยู่จัดส่ง --}}
         <div>
           <label class="block text-sm font-medium">ที่อยู่จัดส่ง</label>
           <textarea
@@ -139,21 +142,85 @@
           @error('shipping_address') <p class="text-sm text-rose-600 mt-1">{{ $message }}</p> @enderror
         </div>
 
+        {{-- ช่องทางการชำระเงิน --}}
+        <div>
+          <label class="block text-sm font-medium mb-1">ช่องทางการชำระเงิน</label>
+          <select
+            name="payment_method"
+            id="payment_method"
+            class="w-full rounded-xl border border-slate-200 px-3 py-2 focus:border-primary focus:ring-2 focus:ring-blue-100"
+            required>
+            <option value="">— เลือกช่องทาง —</option>
+            <option value="cod" @selected(old('payment_method')=='cod')>เก็บเงินปลายทาง (COD)</option>
+            <option value="transfer" @selected(old('payment_method')=='transfer')>โอนผ่านบัญชี / QR Code</option>
+          </select>
+          @error('payment_method') <p class="text-sm text-rose-600 mt-1">{{ $message }}</p> @enderror
+        </div>
+
+        {{-- ส่วนแสดง QR และอัปโหลดสลิป --}}
+        <div id="payment_qr_section" class="{{ old('payment_method')=='transfer' ? '' : 'hidden' }}">
+          <div class="mt-3 bg-slate-50 border rounded-xl p-4 space-y-3">
+            <p class="text-sm font-medium">สแกน QR เพื่อชำระเงิน</p>
+
+            {{-- แสดงภาพ QR --}}
+            <img src="{{ asset('images/QR.jpg') }}" alt="QR Code" class="w-48 h-48 object-contain rounded-lg border bg-white">
+
+            <p class="text-xs text-slate-500">
+              โปรดชำระยอดรวมทั้งหมด <span class="font-semibold text-slate-700">฿{{ number_format($total,2) }}</span>  
+              แล้วอัปโหลดสลิปการชำระเงินเพื่อยืนยัน
+            </p>
+
+            {{-- อัปโหลดสลิป --}}
+            <div>
+              <label class="block text-sm font-medium">อัปโหลดหลักฐานการชำระเงิน</label>
+              <input
+                type="file"
+                name="payment_slip"
+                id="payment_slip"
+                accept="image/*"
+                class="mt-1 block w-full text-sm rounded-lg border border-slate-200 px-3 py-2 focus:border-primary focus:ring-2 focus:ring-blue-100">
+              @error('payment_slip') <p class="text-sm text-rose-600 mt-1">{{ $message }}</p> @enderror
+            </div>
+          </div>
+        </div>
+
+        {{-- Checkbox ยืนยัน --}}
         <label class="inline-flex items-center gap-2 text-sm">
           <input type="checkbox" name="confirm" value="1"
-                 class="rounded border-slate-300"
-                 {{ old('confirm') ? 'checked' : '' }}>
+                class="rounded border-slate-300"
+                {{ old('confirm') ? 'checked' : '' }}>
           ยืนยันการสั่งซื้อ
         </label>
         @error('confirm') <p class="text-sm text-rose-600 -mt-2">{{ $message }}</p> @enderror
 
+        {{-- ปุ่ม --}}
         <div class="pt-2 flex gap-3">
-          <a href="{{ route('customer.cart') }}" class="flex-1 text-center rounded-xl border border-slate-200 px-4 py-2.5 hover:bg-slate-50">กลับไปตะกร้า</a>
-          <button class="flex-1 rounded-xl bg-primary text-white px-5 py-2.5 hover:bg-blue-700">ยืนยันสั่งซื้อ</button>
+          <a href="{{ route('customer.cart') }}" class="flex-1 text-center rounded-xl border border-slate-200 px-4 py-2.5 hover:bg-slate-50">
+            กลับไปตะกร้า
+          </a>
+          <button class="flex-1 rounded-xl bg-primary text-white px-5 py-2.5 hover:bg-blue-700">
+            ยืนยันสั่งซื้อ
+          </button>
         </div>
       </form>
-    </section>
 
+      <script>
+        // toggle แสดง QR เมื่อเลือกวิธีโอนเงิน
+        document.addEventListener('DOMContentLoaded', function() {
+          const select = document.getElementById('payment_method');
+          const qrBox  = document.getElementById('payment_qr_section');
+          select?.addEventListener('change', () => {
+            if (select.value === 'transfer') {
+              qrBox.classList.remove('hidden');
+              document.getElementById('payment_slip').required = true;
+            } else {
+              qrBox.classList.add('hidden');
+              document.getElementById('payment_slip').required = false;
+            }
+          });
+        });
+      </script>
+    </section>
   </main>
 </body>
 </html>
