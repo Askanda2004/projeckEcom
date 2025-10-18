@@ -57,8 +57,11 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
-        Auth::login($user);
+        // Auth::login($user);
 
-        return redirect(route('dashboard', absolute: false));
+        // return redirect(route('dashboard', absolute: false));
+        return redirect()
+            ->route('login')
+            ->with('status', 'สมัครสมาชิกสำเร็จแล้ว กรุณาเข้าสู่ระบบ');
     }
 }
