@@ -30,6 +30,26 @@
       {{-- ========== SIDEBAR ========== --}}
       <aside class="col-span-12 md:col-span-3">
         <div class="bg-white rounded-2xl shadow-soft p-4 md:p-5">
+          @php
+            $sp = $sidebarProfile ?? (auth()->user()->sellerProfile ?? null);
+            $logo = $sp && $sp->logo_path ? asset('storage/'.$sp->logo_path) : null;
+            $shop = $sp->shop_name ?? 'ตั้งชื่อร้านของคุณ';
+          @endphp
+
+          <div class="flex items-center gap-3 mb-4 p-3 rounded-xl border border-slate-200 bg-slate-50">
+            @if($logo)
+              <img src="{{ $logo }}" class="w-10 h-10 rounded-full object-cover border" alt="logo">
+            @else
+              <div class="w-10 h-10 rounded-full bg-slate-200 grid place-items-center text-slate-500 text-xs border">
+                LOGO
+              </div>
+            @endif
+            <div class="min-w-0">
+              <div class="font-semibold truncate">{{ $shop }}</div>
+              <div class="text-xs text-slate-500 truncate">{{ auth()->user()->name }}</div>
+            </div>
+          </div>
+          
           <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-3">Menu</h3>
           <nav class="space-y-1">
             <a href="{{ route('seller.reports.index') }}" class="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-100">
@@ -96,6 +116,12 @@
             <a href="{{ route('seller.orders.index') }}" class="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-100">
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M3 7l9-4 9 4-9 4-9-4zm0 6l9 4 9-4m-9 4v6"/></svg>
               Order Management
+            </a>
+
+            <a href="{{ route('seller.profile.edit') }}"
+              class="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-100">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.9-2.2 4.9-4.9S14.7 2.2 12 2.2 7.1 4.4 7.1 7.1 9.3 12 12 12zm0 2.4c-3.3 0-9.6 1.6-9.6 4.9V22h19.2v-2.7c0-3.3-6.3-4.9-9.6-4.9z"/></svg>
+              Store Profeil
             </a>
           </nav>
         </div>

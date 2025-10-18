@@ -100,6 +100,9 @@ Route::middleware(['auth','verified'])->group(function () {
 
         // รายงานยอดขาย
         Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+
+        Route::get('/profile',  [\App\Http\Controllers\Seller\ProfileController::class, 'edit'])->name('profile.edit');
+        Route::put('/profile',  [\App\Http\Controllers\Seller\ProfileController::class, 'update'])->name('profile.update');
     });
 
 

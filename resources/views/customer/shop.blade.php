@@ -62,10 +62,22 @@
 
       <!-- Actions -->
       <div class="flex items-center gap-2">
-        <a href="{{ route('customer.cart') }}"
-           class="rounded-lg border border-slate-200 px-3 py-1.5 hover:bg-slate-100 transition">
+        @php
+          $cartQty = \Illuminate\Support\Facades\DB::table('carts')
+              ->join('cart_items','cart_items.cart_id','=','carts.cart_id')
+              ->where('carts.user_id', auth()->id())
+              ->sum('cart_items.quantity');
+        @endphp
+
+        <a href="{{ route('customer.cart') }}" class="relative rounded-lg border border-slate-200 px-3 py-1.5 hover:bg-slate-100">
           ตะกร้า
+          @if($cartQty>0)
+            <span class="absolute -top-2 -right-2 text-xs bg-primary text-white rounded-full px-1.5 py-0.5">
+              {{ $cartQty }}
+            </span>
+          @endif
         </a>
+
         <a href="{{ route('customer.orders.index') }}"
           class="rounded-lg border border-slate-200 px-3 py-1.5 hover:bg-slate-100">
           ประวัติการสั่งซื้อ
@@ -94,6 +106,25 @@
       <div class="grid grid-cols-12 gap-6">
         {{-- ============ Sidebar: หมวดหมู่ ============ --}}
         <aside class="col-span-12 md:col-span-3">
+          @php
+            $u = auth()->user();
+            $initial = $u ? mb_substr($u->name ?? '', 0, 1) : '';
+          @endphp
+          <!-- โปรไฟล์ผู้ใช้ -->
+          <div class="mb-4 bg-white rounded-2xl shadow-soft p-4 md:p-5">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-primary/10 text-primary grid place-items-center font-semibold">
+                {{ $initial }}
+              </div>
+              <div class="min-w-0">
+                <div class="text-xs text-slate-500">สวัสดี,</div>
+                <div class="font-semibold truncate">{{ $u->name ?? 'Guest' }}</div>
+                {{-- ถ้าอยากโชว์อีเมลด้วย: --}}
+                {{-- <div class="text-xs text-slate-500 truncate">{{ $u->email ?? '' }}</div> --}}
+              </div>
+            </div>
+          </div>
+
           <div class="bg-white rounded-2xl shadow-soft p-4 md:p-5">
             <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-3">หมวดหมู่</h3>
             <nav class="space-y-1">
