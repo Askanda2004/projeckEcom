@@ -59,7 +59,7 @@
             @endif
             <div class="min-w-0">
               <div class="font-semibold truncate">{{ $shop }}</div>
-              <div class="text-xs text-slate-500 truncate">{{ auth()->user()->name }}</div>
+              {{-- <div class="text-xs text-slate-500 truncate">{{ auth()->user()->name }}</div> --}}
             </div>
           </div>
           

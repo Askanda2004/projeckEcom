@@ -52,7 +52,7 @@
             @endif
             <div class="min-w-0">
               <div class="font-semibold truncate">{{ $shop }}</div>
-              <div class="text-xs text-slate-500 truncate">{{ auth()->user()->name }}</div>
+              {{-- <div class="text-xs text-slate-500 truncate">{{ auth()->user()->name }}</div> --}}
             </div>
           </div>
           
@@ -178,6 +178,7 @@
               <select name="size"
                       class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 focus:border-primary focus:ring-primary/20">
                 <option value="">— เลือกขนาด —</option>
+                <option value="-"  @selected(old('size') == '-')>-</option>
                 <option value="S"  @selected(old('size') == 'S')>S</option>
                 <option value="M"  @selected(old('size') == 'M')>M</option>
                 <option value="L"  @selected(old('size') == 'L')>L</option>
@@ -193,10 +194,15 @@
                       class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 focus:border-primary focus:ring-primary/20">
                 <option value="">— เลือกสี —</option>
                 <option value="แดง"    @selected(old('color') == 'แดง')>แดง</option>
+                <option value="ชมพู"    @selected(old('color') == 'ชมพู')>ชมพู</option>
                 <option value="น้ำเงิน" @selected(old('color') == 'น้ำเงิน')>น้ำเงิน</option>
+                <option value="ฟ้า" @selected(old('color') == 'ฟ้า')>ฟ้า</option>
                 <option value="เขียว"  @selected(old('color') == 'เขียว')>เขียว</option>
                 <option value="ดำ"     @selected(old('color') == 'ดำ')>ดำ</option>
                 <option value="ขาว"    @selected(old('color') == 'ขาว')>ขาว</option>
+                <option value="กากี"    @selected(old('color') == 'กากี')>กากี</option>
+                <option value="ครีม"    @selected(old('color') == 'ครีม')>ครีม</option>
+                <option value="กรม"    @selected(old('color') == 'กรม')>กรม</option>
               </select>
             </div>
 

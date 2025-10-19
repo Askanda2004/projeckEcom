@@ -238,13 +238,12 @@
                       </a>
                     </td>
                     <td class="px-4 py-3 border-b">
-                      <form method="POST" action="{{ route('admin.users.destroy', $user) }}"
-                            onsubmit="return confirm('Delete this user?')">
+                      <form action="{{ route('admin.users.destroy', $user) }}" method="POST"
+                            onsubmit="return confirm('ยืนยันลบผู้ใช้นี้?');" class="inline">
                         @csrf
                         @method('DELETE')
-                        <button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-rose-200 text-rose-700 hover:bg-rose-50">
-                          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H4v2h15V4z"/></svg>
-                          Delete
+                        <button class="px-3 py-1.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 hover:bg-rose-100">
+                          ลบ
                         </button>
                       </form>
                     </td>

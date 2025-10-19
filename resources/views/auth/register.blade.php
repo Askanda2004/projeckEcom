@@ -62,7 +62,7 @@
         <label for="name" class="block text-sm font-medium text-slate-700 mb-1">ชื่อ-นามสกุล</label>
         <input id="name" name="name" type="text" value="{{ old('name') }}" required autofocus autocomplete="name"
                class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-slate-900 placeholder-slate-400 shadow-sm focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none"
-               placeholder="เช่น สมชาย ใจดี">
+               placeholder="ชื่อ-นามสกุล">
         @error('name') <p class="text-sm text-rose-600 mt-1">{{ $message }}</p> @enderror
       </div>
 
@@ -71,7 +71,7 @@
         <label for="email" class="block text-sm font-medium text-slate-700 mb-1">อีเมล</label>
         <input id="email" type="email" name="email" value="{{ old('email') }}" required autocomplete="username"
                class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-slate-900 placeholder-slate-400 shadow-sm focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none"
-               placeholder="you@example.com">
+               placeholder="email@example.com">
         @error('email') <p class="text-sm text-rose-600 mt-1">{{ $message }}</p> @enderror
       </div>
 

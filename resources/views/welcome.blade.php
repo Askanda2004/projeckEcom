@@ -26,8 +26,8 @@
     $featuredProducts = $featuredProducts
       ?? [
         // เปลี่ยนลิงก์รูป/ชื่อ/ราคา ได้เองตามต้องการ
-        ['name' => 'Colour Catalogue', 'price' => 459,  'image' => 'https://scontent-bkk1-1.xx.fbcdn.net/v/t39.30808-6/533175828_669630792819716_312639200855086374_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=833d8c&_nc_ohc=HIlJrP6OgfwQ7kNvwFGkKY3&_nc_oc=AdmE23grzlMjp-vlC1m8tSKizplL3BQVj_8uiUl6So1GSKemVBz6Z6CTqaRdmNGyxvQ&_nc_zt=23&_nc_ht=scontent-bkk1-1.xx&_nc_gid=9wvHvjVb-67__HsTJvktgA&oh=00_AffGKytReLCiLg4h_faNvSM15aklZUCfQNy8T6E1iHq92A&oe=68ECF718'],
-        ['name' => 'Colour Catalogue',  'price' => 459, 'image' => 'https://scontent-bkk1-1.xx.fbcdn.net/v/t39.30808-6/532583329_669630619486400_7802033679680961457_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=833d8c&_nc_ohc=D3-nxqdkfeEQ7kNvwHJIwAN&_nc_oc=Adkn8eHxJMD6A5ymxcLeapbEWFq5MKlWPl6WZsqEfqYpJ_gk3EP_mnvEHpNEVhRSKf8&_nc_zt=23&_nc_ht=scontent-bkk1-1.xx&_nc_gid=8kYHiMD4ToYynx1sZRfl9w&oh=00_AfeQk2abR7EnG0PEAt7sfjHkWZ42gdxQU-Fxi6tM8WWaXw&oe=68ECD27D'],
+        ['name' => 'Delina Series', 'price' => 459,  'image' => 'https://scontent-bkk1-1.xx.fbcdn.net/v/t39.30808-6/557933130_713684545081007_4307792067794112513_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=833d8c&_nc_ohc=dTYE1dFGqtsQ7kNvwHi4Brd&_nc_oc=AdkYLlST_yR_2zKefXgrWvU-WoW1RHj6rKSip_XaxyeQOqEZMlGto_QSlvwMl4DBxDk&_nc_zt=23&_nc_ht=scontent-bkk1-1.xx&_nc_gid=n8By1iZgSFD80mmGpoEpKQ&oh=00_AffVa3_4DgY1TqVIbg6MuYc9SAgSW7I127-KPMNtDcxFOA&oe=68F91F81'],
+        ['name' => 'AMEERZAINI',  'price' => 459, 'image' => 'https://scontent-bkk1-1.xx.fbcdn.net/v/t39.30808-6/558176949_710047298778065_2231450108234336752_n.jpg?stp=dst-jpg_p960x960_tt6&_nc_cat=110&ccb=1-7&_nc_sid=833d8c&_nc_ohc=2R1H9Ui9nksQ7kNvwGN7rAo&_nc_oc=AdkuyX_8PkwOfWpnySSnFow501RbEScKpsa7J4h-Ro0QSy4RcWGmOK09WN1uJw6fPhk&_nc_zt=23&_nc_ht=scontent-bkk1-1.xx&_nc_gid=jKbKtzB-mafBKuRfmfYBLw&oh=00_AfeW0VRIZMikx1G_4RDAlRkR5FMkiCtpVPKKE9QJSOFFYg&oe=68F91BEC'],
         ['name' => 'Colour Catalogue','price' => 459,  'image' => 'https://scontent-bkk1-1.xx.fbcdn.net/v/t39.30808-6/533590906_669630352819760_8559155399271928294_n.jpg?_nc_cat=111&ccb=1-7&_nc_sid=833d8c&_nc_ohc=aRrSUTQNDS8Q7kNvwHbqI3j&_nc_oc=AdkmNMTV2lXdSRoEBKTRZYCaPS_9qXE1mPqiJLBdr1IoidV8CwnRO7baYM1znGjVKbg&_nc_zt=23&_nc_ht=scontent-bkk1-1.xx&_nc_gid=yrFlXwbaJhlplZzhMzUkCw&oh=00_Afc_4Tt6fxBe9ExW9wAu60DZ6-y-8c9xNRVBRlHndTYj5A&oe=68ECE6CC'],
         ['name' => 'Colour Catalogue',   'price' => 459,  'image' => 'https://scontent-bkk1-2.xx.fbcdn.net/v/t39.30808-6/533158328_669630259486436_797284571621129789_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=833d8c&_nc_ohc=iHI4qzY5sD4Q7kNvwEzroH7&_nc_oc=AdkZXEZTMwnRzzCWcrgSQM_6K84hoCnbYEsuXyPjWBuf0wC8m4y0oyZpzMcgadixULA&_nc_zt=23&_nc_ht=scontent-bkk1-2.xx&_nc_gid=Cry_ayj9mVdFc0_FW1c60w&oh=00_Aff1ECTSWQFBfPam5Dq9tA17R46fwz8oDzlHnd7h7PUOgg&oe=68ECF730'],
         
@@ -42,9 +42,10 @@
   <header class="sticky top-0 z-30 bg-white/80 backdrop-blur shadow-soft">
     <div class="max-w-7xl mx-auto h-16 px-4 sm:px-6 lg:px-8 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
-          <svg class="w-5 h-5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path stroke-width="2" d="M4 7h16M4 12h16M4 17h16"/>
+        <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-primary/30 to-blue-200 flex items-center justify-center shadow-md">
+          <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              d="M12 2a10 10 0 100 20 10 10 0 000-20zM9 12l2 2 4-4"/>
           </svg>
         </div>
         <span class="font-bold">แพลตฟอร์มร้านผ้าคลุม</span>

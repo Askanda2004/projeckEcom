@@ -77,7 +77,7 @@
           autocomplete="username"
           required
           class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-slate-900 placeholder-slate-400 shadow-sm focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all"
-          placeholder="you@example.com"
+          placeholder="email@example.com"
         />
         @error('email') <p class="text-sm text-rose-600 mt-1">{{ $message }}</p> @enderror
       </div>

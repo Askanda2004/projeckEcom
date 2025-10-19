@@ -41,7 +41,7 @@ class ProductController extends Controller
                 });
             })
             ->latest()
-            ->paginate(16)
+            ->paginate(10)
             ->withQueryString();
 
         return view('seller.products.index', [
