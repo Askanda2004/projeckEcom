@@ -32,7 +32,7 @@
         <span class="hidden md:inline text-slate-500">ตรวจสอบการชำระเงิน</span>
       </div>
       <form method="POST" action="{{ route('logout') }}"> @csrf
-        <button class="rounded-lg bg-slate-900 text-white px-3 py-1.5 hover:bg-slate-800">ออกจากระบบ</button>
+        <button class="rounded-lg bg-slate-900 text-white px-3 py-1.5 hover:bg-slate-800">Logout</button>
       </form>
     </div>
   </header>

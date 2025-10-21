@@ -57,7 +57,7 @@
             @forelse ($orders as $o)
               <tr class="hover:bg-slate-50 transition">
                 <td class="px-4 py-3 border-b">
-                  {{ \Illuminate\Support\Carbon::parse($o->order_date ?? $o->created_at)->format('d/m/Y H:i') }}
+                  #{{ $o->order_id ?? $o->id }} - {{ \Illuminate\Support\Carbon::parse($o->order_date ?? $o->created_at)->format('d/m/Y H:i') }}
                 </td>
                 <td class="px-4 py-3 border-b">
                   <div class="text-sm font-medium text-slate-700">{{ $o->shipping_name ?? '—' }} • {{ $o->shipping_phone ?? '—' }}</div>

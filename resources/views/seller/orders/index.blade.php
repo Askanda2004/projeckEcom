@@ -259,7 +259,7 @@
                             <h3 class="font-semibold">
                               รายละเอียดคำสั่งซื้อ 
                               <span class="ml-2 text-sm text-slate-500">
-                                ({{ \Illuminate\Support\Carbon::parse($o->order_date)->timezone('Asia/Bangkok')->format('d/m/Y H:i') }})
+                                #{{ $o->order_id ?? $o->id }} - ({{ \Illuminate\Support\Carbon::parse($o->order_date)->timezone('Asia/Bangkok')->format('d/m/Y H:i') }})
                               </span>
                             </h3>
                             <button class="rounded-lg border px-3 py-1.5 text-sm hover:bg-slate-50">ปิด</button>
@@ -300,7 +300,7 @@
                                     </div>
                                   </td>
                                   <td class="px-3 py-2">฿{{ number_format((float)$it->price, 2) }}</td>
-                                  <td class="px-3 py-2">x{{ $it->quantity }}</td>
+                                  <td class="px-3 py-2">{{ $it->quantity }}</td>
                                   <td class="px-3 py-2 text-right">฿{{ number_format((float)$it->price * (int)$it->quantity, 2) }}</td>
                                 </tr>
                               @empty

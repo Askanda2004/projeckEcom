@@ -13,14 +13,11 @@ class ShopController extends Controller
 {
     public function shop(Request $request)
     {
-        // รับพารามิเตอร์
         $q           = trim($request->get('q', ''));
         $categoryId  = $request->filled('category') ? (int) $request->get('category') : null;
 
-        // หมวดหมู่ทั้งหมด + จำนวนสินค้าในแต่ละหมวด (เฉพาะสินค้าที่อยู่ในระบบ)
         $categories = Category::query()
             ->withCount(['products as products_count' => function ($s) use ($q) {
-                // นับแบบเคารพคำค้นหา (จะได้จำนวนที่ตรงกับผลลัพธ์ตอนนี้)
                 if ($q !== '') {
                     $s->where(function ($w) use ($q) {
                         $w->where('name','like',"%{$q}%")
@@ -33,7 +30,6 @@ class ShopController extends Controller
             ->orderBy('category_name')
             ->get();
 
-        // Query หลักของสินค้า
         $products = Product::query()
             ->with(['images','category'])
             ->when($q !== '', function ($s) use ($q) {
@@ -44,9 +40,7 @@ class ShopController extends Controller
                       ->orWhere('color','like',"%{$q}%");
                 });
             })
-            ->when($categoryId, function ($s) use ($categoryId) {
-                $s->where('category_id', $categoryId);
-            })
+            ->when($categoryId, fn($s) => $s->where('category_id', $categoryId))
             ->latest()
             ->paginate(16)
             ->withQueryString();
@@ -59,7 +53,6 @@ class ShopController extends Controller
         ]);
     }
 
-    // ถ้าคุณมีหน้าแสดงรายละเอียดสินค้า
     public function show(Product $product)
     {
         $product->load(['images','category']);
@@ -72,27 +65,6 @@ class ShopController extends Controller
 
         return view('customer.product-show', compact('product','related'));
     }
-    /** หน้าร้าน (ใส่ของคุณเอง) */
-    // public function shop(Request $request)
-    // {
-    //     $q = trim($request->get('q', ''));
-
-    //     $products = Product::query()
-    //         ->when($q !== '', function ($s) use ($q) {
-    //             $s->where(function ($w) use ($q) {
-    //                 $w->where('name', 'like', "%{$q}%")
-    //                   ->orWhere('description', 'like', "%{$q}%")
-    //                   ->orWhere('size', 'like', "%{$q}%")
-    //                   ->orWhere('description', 'like', "%{$q}%")
-    //                   ->orWhere('color', 'like', "%{$q}%");
-    //             });
-    //         })
-    //         ->orderByDesc('product_id')   // ใช้คีย์จริงของตาราง
-    //         ->paginate(12)
-    //         ->withQueryString();
-
-    //     return view('customer.shop', compact('products', 'q'));
-    // }
 
     /** ตะกร้า: โหลดจาก DB -> สร้าง array ให้ view + sync session เผื่อมีแก้ไขนอกหน้า cart */
     public function cart()
@@ -103,6 +75,10 @@ class ShopController extends Controller
         foreach ($cart->items as $it) {
             $p = $it->product;
             if (!$p) continue;
+
+            // ⚠️ เก็บสต็อกใส่ลง session cart ด้วย
+            $stock = max(0, (int)($p->stock_quantity ?? 0));
+
             $sessionCart[$p->product_id] = [
                 'name'      => $p->name,
                 'price'     => (float) ($it->price ?? $p->price),
@@ -112,6 +88,7 @@ class ShopController extends Controller
                 'seller_id' => $p->seller_id,
                 'image_url' => $p->image_url,
                 'image'     => $p->image_url, // alias กัน view เก่า
+                'stock'     => $stock,        // ✅ ใส่สต็อก
             ];
         }
         session(['cart' => $sessionCart]);
@@ -124,7 +101,7 @@ class ShopController extends Controller
         ]);
     }
 
-    /** เพิ่มสินค้า (มีของคุณอยู่แล้ว แต่รวมไว้ให้ครบ flow) */
+    /** เพิ่มสินค้า */
     public function addToCart(Request $request, Product $product)
     {
         $data = $request->validate([
@@ -132,9 +109,13 @@ class ShopController extends Controller
         ]);
         $qty  = (int) $data['qty'];
 
-        // ✅ เช็กจำนวนไม่ให้เกินสต็อก
-        if ($qty > $product->stock_quantity) {
-            return back()->with('status', 'จำนวนที่เลือกมากกว่าสต็อกที่มี')->withInput();
+        $stock = max(0, (int)($product->stock_quantity ?? 0));
+        if ($stock <= 0) {
+            return back()->with('error', 'สินค้าหมดสต็อกแล้ว');
+        }
+
+        if ($qty > $stock) {
+            return back()->with('error', "จำนวนที่เลือกเกินสต็อก สูงสุดคือ {$stock} ชิ้น")->withInput();
         }
 
         $cart = $this->userCart();
@@ -150,9 +131,9 @@ class ShopController extends Controller
             $item->quantity = 0;
         }
 
-        // ✅ รวมกับของเดิมแล้วก็ต้องไม่เกินสต็อกเช่นกัน
-        if ($item->quantity + $qty > $product->stock_quantity) {
-            return back()->with('status', 'จำนวนรวมในตะกร้าเกินสต็อกที่มี')->withInput();
+        // รวมของเดิม + ใหม่ ก็ยังต้องไม่เกินสต็อก
+        if ($item->quantity + $qty > $stock) {
+            return back()->with('error', "จำนวนรวมในตะกร้าเกินสต็อก สูงสุดคือ {$stock} ชิ้น");
         }
 
         $item->quantity  = $item->quantity + $qty;
@@ -166,8 +147,7 @@ class ShopController extends Controller
         return back()->with('status','เพิ่มสินค้าลงตะกร้าแล้ว');
     }
 
-
-    /** ✅ อัปเดตจำนวนสินค้า: id = product_id */
+    /** อัปเดตจำนวนสินค้า: id = product_id */
     public function updateCart(Request $request, $id)
     {
         $data = $request->validate([
@@ -177,23 +157,35 @@ class ShopController extends Controller
 
         $cart = $this->userCart();
 
-        $item = CartItem::where('cart_id', $cart->cart_id)
-            ->where('product_id', $id)
-            ->first();
+        $product = Product::where('product_id', $id)->first();
+        if (!$product) {
+            return back()->with('error', 'ไม่พบสินค้าในระบบ');
+        }
 
-        if (!$item) {
-            // ถ้าไม่มี item แต่ user กรอกเลข ก็สร้างใหม่จาก product
-            $product = Product::where('product_id', $id)->first();
-            if (!$product) {
-                return back()->with('error', 'ไม่พบสินค้าในระบบ');
-            }
-            $item = new CartItem();
-            $item->cart_id    = $cart->cart_id;
-            $item->product_id = $product->product_id;
-            $item->price      = (float) $product->price;
-            $item->size       = $product->size;
-            $item->color      = $product->color;
-            $item->image_url  = $product->image_url;
+        $stock = max(0, (int)($product->stock_quantity ?? 0));
+        if ($stock <= 0) {
+            // ถ้าสต็อกหมด ให้ตั้งเป็น 0 หรือเอาออกจากตะกร้าเลยก็ได้
+            CartItem::where('cart_id', $cart->cart_id)->where('product_id', $id)->delete();
+            $this->refreshSessionCart($cart);
+            return back()->with('error','สินค้าหมดสต็อก รายการถูกนำออกจากตะกร้าแล้ว');
+        }
+
+        // clamp ไม่ให้เกินสต็อก
+        if ($qty > $stock) {
+            $qty = $stock;
+            session()->flash('error', "จำนวนที่เลือกเกินสต็อก สูงสุดคือ {$stock} ชิ้น");
+        }
+
+        $item = CartItem::firstOrNew([
+            'cart_id'    => $cart->cart_id,
+            'product_id' => $product->product_id,
+        ]);
+
+        if (!$item->exists) {
+            $item->price     = (float) $product->price;
+            $item->size      = $product->size;
+            $item->color     = $product->color;
+            $item->image_url = $product->image_url;
         }
 
         $item->quantity = $qty;
@@ -204,7 +196,7 @@ class ShopController extends Controller
         return back()->with('status','อัปเดตจำนวนแล้ว');
     }
 
-    /** ✅ ลบรายการหนึ่งชิ้น: id = product_id */
+    /** ลบรายการหนึ่งชิ้น: id = product_id */
     public function removeFromCart(Request $request, $id)
     {
         $cart = $this->userCart();
@@ -218,7 +210,7 @@ class ShopController extends Controller
         return back()->with('status','ลบรายการแล้ว');
     }
 
-    /** ✅ ล้างตะกร้าทั้งหมดของ user */
+    /** ล้างตะกร้าทั้งหมดของ user */
     public function clearCart()
     {
         $cart = $this->userCart();
@@ -230,13 +222,13 @@ class ShopController extends Controller
         return back()->with('status','ล้างตะกร้าแล้ว');
     }
 
-    /** ยูทิลิตี้: คืน Cart ของผู้ใช้ (ถ้าไม่มีให้สร้าง) */
+    /** คืน Cart ของผู้ใช้ (ถ้าไม่มีให้สร้าง) */
     protected function userCart(): Cart
     {
         return Cart::firstOrCreate(['user_id' => auth()->id()], []);
     }
 
-    /** ยูทิลิตี้: sync DB cart -> session('cart') เพื่อให้หน้า view/checkout ใช้ข้อมูลล่าสุด */
+    /** sync DB cart -> session('cart') */
     protected function refreshSessionCart(Cart $cart): void
     {
         $cart->load(['items.product']);
@@ -246,6 +238,8 @@ class ShopController extends Controller
             $p = $it->product;
             if (!$p) continue;
 
+            $stock = max(0, (int)($p->stock_quantity ?? 0));
+
             $sessionCart[$p->product_id] = [
                 'name'      => $p->name,
                 'price'     => (float) ($it->price ?? $p->price),
@@ -254,7 +248,8 @@ class ShopController extends Controller
                 'color'     => $p->color,
                 'seller_id' => $p->seller_id,
                 'image_url' => $p->image_url,
-                'image'     => $p->image_url, // alias กัน view เก่า
+                'image'     => $p->image_url,
+                'stock'     => $stock, // ✅ ให้ Blade ใช้เป็น data-max
             ];
         }
 

@@ -8,7 +8,6 @@
   <!-- Tailwind via CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
-    // โทนมินิมอล: sand/ink/olive + เงานุ่ม
     tailwind.config = {
       theme: {
         extend: {
@@ -46,7 +45,6 @@
   @endif
 
   @php
-    // ป้องกันกรณีไม่ได้ส่งตัวแปรมา
     $cart  = $cart  ?? [];
     $total = (float)($total ?? 0);
   @endphp
@@ -66,12 +64,21 @@
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
       <!-- รายการสินค้า -->
       <section class="lg:col-span-8 space-y-4">
-        {{-- $cart: product_id => [name, price, qty, image_url/image, size, color] --}}
+        {{-- $cart: product_id => [name, price, qty, image_url/image, size, color, stock] --}}
         @foreach($cart as $product_id => $row)
           @php
-            $price = (float)($row['price'] ?? 0);
-            $qty   = max(1, (int)($row['qty'] ?? 1));
-            $sum   = $price * $qty;
+            $price    = (float)($row['price'] ?? 0);
+            $qty      = max(1, (int)($row['qty'] ?? 1));
+
+            // ดึงจำนวนคงเหลือจากตะกร้า (ถ้าคุณ push มาแล้ว) หรือ fallback 999
+            // แนะนำให้ใส่ 'stock' ลงใน $cart เวลาบิลด์ตะกร้าเสมอ
+            $stockRaw = $row['stock'] ?? $row['available'] ?? 999;
+            $stock    = max(0, (int)$stockRaw);
+            $maxQty   = max(1, min($stock, 999));
+
+            // ถ้า qty เกินสต็อก ให้ clamp เฉย ๆ เวลาแสดงผล
+            if ($qty > $maxQty) { $qty = $maxQty; }
+            $sum = $price * $qty;
 
             $img    = $row['image_url'] ?? ($row['image'] ?? null);
             $imgSrc = $img
@@ -96,6 +103,10 @@
                     <p class="text-xs text-slate-600 mt-1">
                       ขนาด: {{ $row['size'] ?? '—' }} • สี: {{ $row['color'] ?? '—' }}
                     </p>
+                    <span class="text-[11px] px-2 py-0.5 rounded-full border
+                        {{ $stock > 0 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200' }}">
+                        {{ $stock > 0 ? 'พร้อมส่ง · เหลือ ' . $stock : 'หมดชั่วคราว' }}
+                      </span>
                   </div>
 
                   <form method="POST" action="{{ route('customer.cart.remove', $product_id) }}"
@@ -115,11 +126,16 @@
                     <form method="POST" action="{{ route('customer.cart.update', $product_id) }}" class="flex items-center gap-2">
                       @csrf @method('PATCH')
 
-                      <div class="qty-wrap flex items-center border border-slate-200 rounded-xl overflow-hidden" data-min="1" data-max="999">
+                      <div
+                        class="qty-wrap flex items-center border border-slate-200 rounded-xl overflow-hidden"
+                        data-min="1" data-max="{{ $maxQty }}"
+                      >
                         <button type="button" class="btn-dec px-3 py-2 text-slate-600 hover:bg-slate-100">−</button>
-                        <input type="number" name="qty"
-                               class="qty-input w-16 text-center border-x border-slate-200 focus:outline-none"
-                               value="{{ $qty }}" min="1" max="999">
+                        <input
+                          type="number" name="qty"
+                          class="qty-input w-16 text-center border-x border-slate-200 focus:outline-none"
+                          value="{{ $qty }}" min="1" max="{{ $maxQty }}"
+                        >
                         <button type="button" class="btn-inc px-3 py-2 text-slate-600 hover:bg-slate-100">+</button>
                       </div>
 
@@ -155,7 +171,6 @@
               <span class="text-slate-600">ยอดรวม</span>
               <span class="font-medium">฿{{ number_format($total, 2) }}</span>
             </div>
-            {{-- ใส่ส่วนลด/ค่าส่งในอนาคตได้ที่นี่ --}}
           </div>
 
           <a href="{{ route('customer.checkout') }}"
@@ -173,7 +188,7 @@
 </main>
 
 <script>
-  // Qty stepper ให้ลื่นมือเหมือนหน้าอื่น ๆ
+  // Qty stepper: บังคับไม่เกินสต็อก (data-max) และไม่ต่ำกว่า (data-min)
   document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.qty-wrap').forEach(wrap => {
       const input = wrap.querySelector('.qty-input');
@@ -182,11 +197,14 @@
       const min   = Number(wrap.dataset.min || 1);
       const max   = Number(wrap.dataset.max || 999);
 
-      function clamp() {
+      function clamp(showAlert = false) {
         let v = Number(input.value || 0);
         if (isNaN(v)) v = min;
         if (v < min) v = min;
-        if (v > max) v = max;
+        if (v > max) {
+          v = max;
+          if (showAlert) alert(`จำนวนสูงสุดคือ ${max} ชิ้น (ตามสต็อกสินค้า)`);
+        }
         input.value = v;
 
         dec.disabled = v <= min;
@@ -196,8 +214,8 @@
       }
 
       dec.addEventListener('click', () => { input.stepDown(); clamp(); });
-      inc.addEventListener('click', () => { input.stepUp();   clamp(); });
-      input.addEventListener('input', clamp);
+      inc.addEventListener('click', () => { input.stepUp();   clamp(true); });
+      input.addEventListener('input', () => clamp());
 
       clamp();
     });

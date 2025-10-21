@@ -85,12 +85,20 @@
               <div>
                 <label class="block text-sm font-medium">เบอร์โทร</label>
                 <input
+                  type="tel"
                   name="shipping_phone"
                   value="{{ old('shipping_phone') }}"
                   placeholder="0812345678"
+                  maxlength="10"
+                  pattern="\d{10}"
+                  inputmode="numeric"
+                  oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)"
                   class="mt-1 w-full h-11 rounded-xl border border-slate-200 bg-white/70 focus:bg-white px-3 outline-none focus:ring-2 focus:ring-olive/30"
-                  required>
-                @error('shipping_phone') <p class="text-sm text-rose-600 mt-1">{{ $message }}</p> @enderror
+                  required
+                >
+                @error('shipping_phone')
+                  <p class="text-sm text-rose-600 mt-1">{{ $message }}</p>
+                @enderror
               </div>
 
               {{-- ที่อยู่จัดส่ง --}}

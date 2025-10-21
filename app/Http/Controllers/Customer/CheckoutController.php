@@ -65,7 +65,7 @@ class CheckoutController extends Controller
         // ✅ ตรวจฟอร์ม + ไฟล์สลิป
         $data = $request->validate([
             'shipping_name'    => ['required','string','max:255'],
-            'shipping_phone'   => ['required','string','max:30'],
+            'shipping_phone'   => ['required','string','digits:10'],
             'shipping_address' => ['required','string','max:2000'],
             'payment_slip'     => ['nullable','image','max:2048'], // สลิปโอนเงิน
             'confirm'          => ['required','accepted'],
