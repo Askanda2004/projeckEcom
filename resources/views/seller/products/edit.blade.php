@@ -6,15 +6,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
-    tailwind.config = { theme: { extend: { colors:{ primary:{DEFAULT:'#2563eb'} }, boxShadow:{soft:'0 8px 30px rgba(0,0,0,0.08)'} } } }
+    // โทนมินิมอลให้เข้าชุดทุกหน้า
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors:{ sand:'#FAFAF7', ink:'#111827', olive:'#7C8B6A', primary:{DEFAULT:'#2563eb'} },
+          boxShadow:{ soft:'0 6px 24px rgba(0,0,0,0.06)', card:'0 10px 35px rgba(0,0,0,0.08)' },
+          borderRadius:{ xl2:'1rem' }
+        }
+      }
+    }
   </script>
+  <style>
+    .req::after{content:" *"; color:#ef4444;}
+  </style>
 </head>
-<body class="bg-slate-50 text-slate-800">
+<body class="bg-gradient-to-br from-sand to-white text-ink antialiased">
 
   {{-- HEADER --}}
-  <header class="sticky top-0 z-30 bg-white/90 backdrop-blur shadow-soft">
+  <header class="sticky top-0 z-30 bg-white/80 backdrop-blur border-b border-slate-100">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <div class="font-bold">Seller • Edit Product</div>
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-olive/10 grid place-items-center">
+          <svg class="w-5 h-5 text-olive" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="2" d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </div>
+        <span class="font-semibold">Seller • Edit Product</span>
+      </div>
       <a href="{{ route('seller.products.index') }}" class="text-sm text-slate-600 hover:text-slate-900">Back to list</a>
     </div>
   </header>
@@ -29,44 +46,41 @@
     <div class="grid grid-cols-12 gap-6">
       {{-- ========== SIDEBAR ========== --}}
       <aside class="col-span-12 md:col-span-3">
-        <div class="bg-white rounded-2xl shadow-soft p-4 md:p-5">
+        <div class="bg-white rounded-2xl shadow-card p-4 md:p-5">
           @php
             $sp = $sidebarProfile ?? (auth()->user()->sellerProfile ?? null);
             $logo = $sp && $sp->logo_path ? asset('storage/'.$sp->logo_path) : null;
             $shop = $sp->shop_name ?? 'ตั้งชื่อร้านของคุณ';
           @endphp
 
-          <div class="flex items-center gap-3 mb-4 p-3 rounded-xl border border-slate-200 bg-slate-50">
+          <div class="flex items-center gap-3 mb-4 p-3 rounded-xl border border-slate-200 bg-white">
             @if($logo)
               <img src="{{ $logo }}" class="w-10 h-10 rounded-full object-cover border" alt="logo">
             @else
-              <div class="w-10 h-10 rounded-full bg-slate-200 grid place-items-center text-slate-500 text-xs border">
-                LOGO
-              </div>
+              <div class="w-10 h-10 rounded-full bg-sand grid place-items-center text-slate-500 text-xs border">LOGO</div>
             @endif
             <div class="min-w-0">
               <div class="font-semibold truncate">{{ $shop }}</div>
-              {{-- <div class="text-xs text-slate-500 truncate">{{ auth()->user()->name }}</div> --}}
             </div>
           </div>
           
           <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-3">Menu</h3>
           <nav class="space-y-1">
-            <a href="{{ route('seller.reports.index') }}" class="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-100">
+            <a href="{{ route('seller.reports.index') }}" class="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-50">
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
-              Analytics & Reports
+              การวิเคราะห์และรายงาน
             </a>
 
             {{-- Product Management (collapsible) --}}
             <div class="rounded-2xl">
               <button type="button"
-                      class="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl {{ $isProductSection ? 'bg-slate-100 text-slate-900' : 'hover:bg-slate-100' }} transition pr-1"
+                      class="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl {{ $isProductSection ? 'bg-slate-100 text-slate-900' : 'hover:bg-slate-50' }} transition pr-1"
                       data-toggle="submenu-products"
                       aria-expanded="{{ $isProductSection ? 'true' : 'false' }}"
                       aria-controls="submenu-products">
                 <span class="flex items-center gap-2">
                   <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M3 6h18v2H3V6zm0 5h18v2H3v-2zm0 5h18v2H3v-2z"/></svg>
-                  Product Management
+                  การจัดการสินค้า
                 </span>
                 <svg class="w-4 h-4 transition-transform shrink-0"
                      style="transform: rotate({{ $isProductSection ? '90' : '0' }}deg)"
@@ -93,14 +107,6 @@
                       เพิ่มสินค้า
                     </a>
                   </li>
-                  {{-- <li>
-                    <a href="{{ route('seller.categories.index') }}"
-                       class="submenu-link flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-50
-                              {{ request()->routeIs('seller.categories.*') ? 'bg-slate-100 text-slate-900' : '' }}">
-                      <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
-                      หมวดหมู่สินค้า
-                    </a>
-                  </li> --}}
                   <li>
                     <a href="{{ route('seller.subcategories.index') }}"
                        class="submenu-link flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-50
@@ -113,15 +119,15 @@
               </div>
             </div>
 
-            <a href="{{ route('seller.orders.index') }}" class="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-100">
+            <a href="{{ route('seller.orders.index') }}" class="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-50">
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M3 7l9-4 9 4-9 4-9-4zm0 6l9 4 9-4m-9 4v6"/></svg>
-              Order Management
+              การจัดการคำสั่งซื้อ
             </a>
 
             <a href="{{ route('seller.profile.edit') }}"
-              class="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-100">
+              class="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-50">
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.9-2.2 4.9-4.9S14.7 2.2 12 2.2 7.1 4.4 7.1 7.1 9.3 12 12 12zm0 2.4c-3.3 0-9.6 1.6-9.6 4.9V22h19.2v-2.7c0-3.3-6.3-4.9-9.6-4.9z"/></svg>
-              Store Profeil
+              โปรไฟล์ร้านค้า
             </a>
           </nav>
         </div>
@@ -132,7 +138,7 @@
       <section class="col-span-12 md:col-span-9 space-y-6">
 
         @if ($errors->any())
-          <div class="rounded-2xl bg-red-50 text-red-700 px-4 py-3 shadow-soft">
+          <div class="rounded-2xl bg-rose-50 text-rose-700 px-4 py-3 border border-rose-200 shadow-soft">
             <ul class="list-disc pl-5">
               @foreach ($errors->all() as $e) <li>{{ $e }}</li> @endforeach
             </ul>
@@ -140,7 +146,7 @@
         @endif
 
         {{-- ฟอร์มที่ 1: อัปเดตข้อมูลสินค้า + เพิ่มรูปใหม่ --}}
-        <div class="bg-white rounded-2xl shadow-soft p-6 sm:p-8">
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-soft p-6 sm:p-8">
           <form method="POST"
                 action="{{ route('seller.products.update', $product) }}"
                 enctype="multipart/form-data"
@@ -149,15 +155,15 @@
             @method('PATCH')
 
             <div class="md:col-span-2">
-              <label class="block text-sm font-medium">ชื่อสินค้า</label>
+              <label class="block text-sm font-medium req">ชื่อสินค้า</label>
               <input name="name" value="{{ old('name', $product->name) }}" required
-                    class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 focus:border-primary focus:ring-primary/20">
+                    class="mt-1 w-full h-11 rounded-xl border border-slate-200 bg-white/70 focus:bg-white px-3 outline-none focus:ring-2 focus:ring-olive/30">
             </div>
 
             <div>
               <label class="block text-sm font-medium">หมวดหมู่</label>
               <select name="category_id"
-                      class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 focus:border-primary focus:ring-primary/20">
+                      class="mt-1 w-full h-11 rounded-xl border border-slate-200 bg-white/70 focus:bg-white px-3 outline-none focus:ring-2 focus:ring-olive/30">
                 <option value="">— ไม่ระบุ —</option>
                 @foreach ($categories as $c)
                   <option value="{{ $c->category_id }}" @selected(old('category_id', $product->category_id) == $c->category_id)>
@@ -170,7 +176,7 @@
             <div>
               <label class="block text-sm font-medium">ขนาด</label>
               <select name="size"
-                      class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 focus:border-primary focus:ring-primary/20">
+                      class="mt-1 w-full h-11 rounded-xl border border-slate-200 bg-white/70 focus:bg-white px-3 outline-none focus:ring-2 focus:ring-olive/30">
                 <option value="">— เลือกขนาด —</option>
                 <option value="S"  @selected(old('size', $product->size) == 'S')>S</option>
                 <option value="M"  @selected(old('size', $product->size) == 'M')>M</option>
@@ -184,46 +190,48 @@
             <div>
               <label class="block text-sm font-medium">สี</label>
               <select name="color"
-                      class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 focus:border-primary focus:ring-primary/20">
+                      class="mt-1 w-full h-11 rounded-xl border border-slate-200 bg-white/70 focus:bg-white px-3 outline-none focus:ring-2 focus:ring-olive/30">
                 <option value="">— เลือกสี —</option>
-                <option value="แดง"    @selected(old('color') == 'แดง')>แดง</option>
-                <option value="ชมพู"    @selected(old('color') == 'ชมพู')>ชมพู</option>
-                <option value="น้ำเงิน" @selected(old('color') == 'น้ำเงิน')>น้ำเงิน</option>
-                <option value="ฟ้า" @selected(old('color') == 'ฟ้า')>ฟ้า</option>
-                <option value="เขียว"  @selected(old('color') == 'เขียว')>เขียว</option>
-                <option value="ดำ"     @selected(old('color') == 'ดำ')>ดำ</option>
-                <option value="ขาว"    @selected(old('color') == 'ขาว')>ขาว</option>
-                <option value="กากี"    @selected(old('color') == 'กากี')>กากี</option>
-                <option value="ครีม"    @selected(old('color') == 'ครีม')>ครีม</option>
-                <option value="กรม"    @selected(old('color') == 'กรม')>กรม</option>
+                <option value="แดง"    @selected(old('color', $product->color) == 'แดง')>แดง</option>
+                <option value="ชมพู"    @selected(old('color', $product->color) == 'ชมพู')>ชมพู</option>
+                <option value="น้ำเงิน" @selected(old('color', $product->color) == 'น้ำเงิน')>น้ำเงิน</option>
+                <option value="ฟ้า"     @selected(old('color', $product->color) == 'ฟ้า')>ฟ้า</option>
+                <option value="เขียว"   @selected(old('color', $product->color) == 'เขียว')>เขียว</option>
+                <option value="ดำ"      @selected(old('color', $product->color) == 'ดำ')>ดำ</option>
+                <option value="ขาว"     @selected(old('color', $product->color) == 'ขาว')>ขาว</option>
+                <option value="กากี"    @selected(old('color', $product->color) == 'กากี')>กากี</option>
+                <option value="ครีม"    @selected(old('color', $product->color) == 'ครีม')>ครีม</option>
+                <option value="กรม"     @selected(old('color', $product->color) == 'กรม')>กรม</option>
+                <option value="เนื้อ"     @selected(old('color', $product->color) == 'เนื้อ')>เนื้อ</option>
+                <option value="เทา"     @selected(old('color', $product->color) == 'เทา')>เทา</option>
               </select>
             </div>
 
             <div>
-              <label class="block text-sm font-medium">ราคา</label>
+              <label class="block text-sm font-medium req">ราคา</label>
               <input type="number" step="0.01" min="0" name="price" value="{{ old('price', $product->price) }}" required
-                    class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 focus:border-primary focus:ring-primary/20">
+                    class="mt-1 w-full h-11 rounded-xl border border-slate-200 bg-white/70 focus:bg-white px-3 outline-none focus:ring-2 focus:ring-olive/30">
             </div>
 
             <div>
-              <label class="block text-sm font-medium">จำนวนคงเหลือ</label>
+              <label class="block text-sm font-medium req">จำนวนคงเหลือ</label>
               <input type="number" min="0" name="stock_quantity" value="{{ old('stock_quantity', $product->stock_quantity) }}" required
-                    class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 focus:border-primary focus:ring-primary/20">
+                    class="mt-1 w-full h-11 rounded-xl border border-slate-200 bg-white/70 focus:bg-white px-3 outline-none focus:ring-2 focus:ring-olive/30">
             </div>
 
             <div class="md:col-span-2">
               <label class="block text-sm font-medium">แบรนด์สินค้าชื่อ</label>
               <textarea name="description" rows="2"
-                        class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 focus:border-primary focus:ring-primary/20">{{ old('description', $product->description) }}</textarea>
+                        class="mt-1 w-full rounded-xl border border-slate-200 bg-white/70 focus:bg-white px-3 py-2 outline-none focus:ring-2 focus:ring-olive/30">{{ old('description', $product->description) }}</textarea>
             </div>
 
             {{-- อัปโหลดรูปเพิ่ม (หลายรูป) + preview --}}
             <div class="md:col-span-2">
               <label class="block text-sm font-medium">อัปโหลดรูปเพิ่ม (ไม่บังคับ)</label>
               <input id="newImages" type="file" name="images[]" accept="image/*" multiple
-                    class="mt-1 block w-full rounded-xl border border-slate-200 px-3 py-2 focus:border-primary focus:ring-primary/20">
-              @error('images') <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
-              @error('images.*') <p class="text-sm text-red-600 mt-1">{{ $message }}</p> @enderror
+                    class="mt-1 block w-full rounded-xl border border-slate-200 bg-white/70 focus:bg-white px-3 py-2 outline-none focus:ring-2 focus:ring-olive/30">
+              @error('images') <p class="text-sm text-rose-600 mt-1">{{ $message }}</p> @enderror
+              @error('images.*') <p class="text-sm text-rose-600 mt-1">{{ $message }}</p> @enderror
 
               <div id="previewWrapNew" class="mt-3 hidden">
                 <div class="flex items-center justify-between mb-2">
@@ -238,14 +246,14 @@
             </div>
 
             <div class="md:col-span-2 flex items-center gap-3 pt-2">
-              <button class="rounded-xl bg-primary text-white px-5 py-2.5 hover:bg-blue-700">บันทึกการแก้ไข</button>
-              <a href="{{ route('seller.products.index') }}" class="rounded-xl border border-slate-200 px-4 py-2 hover:bg-slate-50">ยกเลิก</a>
+              <button class="rounded-xl bg-ink text-white px-5 h-11 hover:opacity-90">บันทึกการแก้ไข</button>
+              <a href="{{ route('seller.products.index') }}" class="rounded-xl border border-slate-200 h-11 px-4 grid place-items-center hover:bg-slate-50">ยกเลิก</a>
             </div>
           </form>
         </div>
 
         {{-- ส่วนรูปเดิม --}}
-        <div class="bg-white rounded-2xl shadow-soft p-6 sm:p-8">
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-soft p-6 sm:p-8">
           <h2 class="font-semibold mb-3">รูปปัจจุบัน</h2>
 
           @php
@@ -275,11 +283,11 @@
                       <label class="text-xs text-slate-600 block mb-1">แทนที่รูปนี้</label>
                       <input type="file" name="replace_image" accept="image/*"
                              class="block w-full text-sm rounded-lg border border-slate-200 px-3 py-1.5 focus:border-primary focus:ring-primary/20">
-                      @error('replace_image') <p class="text-xs text-red-600 mt-1">{{ $message }}</p> @enderror
+                      @error('replace_image') <p class="text-xs text-rose-600 mt-1">{{ $message }}</p> @enderror
                     </div>
 
                     <div class="flex items-center gap-2 pt-1">
-                      <button class="text-xs rounded-lg bg-primary text-white px-3 py-1.5 hover:bg-blue-700">
+                      <button class="text-xs rounded-lg bg-ink text-white px-3 py-1.5 hover:opacity-90">
                         อัปเดตรูปนี้
                       </button>
                     </div>

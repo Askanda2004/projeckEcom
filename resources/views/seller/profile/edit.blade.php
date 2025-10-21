@@ -5,20 +5,36 @@
   <title>Seller • โปรไฟล์ร้าน</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
-    tailwind.config = { theme: { extend: {
-      colors:{ primary:{DEFAULT:'#2563eb'} },
-      boxShadow:{ soft:'0 8px 30px rgba(0,0,0,.08)' }
-    } } }
+    // โทนมินิมอลให้เข้าชุดทั้งระบบ
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            sand:'#FAFAF7',
+            ink:'#111827',
+            olive:'#7C8B6A',
+            primary:{DEFAULT:'#2563eb'}
+          },
+          boxShadow: {
+            soft:'0 6px 24px rgba(0,0,0,0.06)',
+            card:'0 10px 35px rgba(0,0,0,0.08)'
+          },
+          borderRadius: { xl2:'1rem' }
+        }
+      }
+    }
   </script>
 </head>
-<body class="bg-slate-50 text-slate-800">
+<body class="bg-gradient-to-br from-sand to-white text-ink antialiased">
 
 {{-- HEADER --}}
 <header class="sticky top-0 z-30 bg-white/90 backdrop-blur shadow-soft">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
     <div class="flex items-center gap-3">
-      <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
-        <svg class="w-5 h-5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="2" d="M4 7h16M4 12h16M4 17h16"/></svg>
+      <div class="w-10 h-10 rounded-2xl bg-olive/10 flex items-center justify-center">
+        <svg class="w-5 h-5 text-olive" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path stroke-width="2" d="M4 7h16M4 12h16M4 17h16"/>
+        </svg>
       </div>
       <span class="font-bold">Seller</span>
       <span class="hidden md:inline text-slate-400">/</span>
@@ -26,7 +42,7 @@
     </div>
     <div class="flex items-center gap-2">
       <form method="POST" action="{{ route('logout') }}"> @csrf
-        <button class="px-3 py-1.5 text-sm rounded-lg bg-slate-900 text-white hover:bg-slate-800">Logout</button>
+        <button class="px-3 py-1.5 text-sm rounded-lg bg-slate-900 text-white hover:bg-slate-800">ออกจากระบบ</button>
       </form>
     </div>
   </div>
@@ -68,7 +84,7 @@
         <a href="{{ route('seller.reports.index') }}"
            class="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-100">
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
-          Analytics & Reports
+          การวิเคราะห์และรายงาน
         </a>
 
         {{-- Product Management (collapsible) --}}
@@ -80,7 +96,7 @@
                   aria-controls="submenu-products">
             <span class="flex items-center gap-2">
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M3 6h18v2H3V6zm0 5h18v2H3v-2zm0 5h18v2H3v-2z"/></svg>
-              Product Management
+              การจัดการสินค้า
             </span>
             <svg class="w-4 h-4 transition-transform shrink-0"
                  style="transform: rotate({{ $isProductSection ? '90' : '0' }}deg)"
@@ -119,14 +135,13 @@
         <a href="{{ route('seller.orders.index') }}"
            class="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-100">
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M3 7l9-4 9 4-9 4-9-4zm0 6l9 4 9-4m-9 4v6"/></svg>
-          Order Management
+          การจัดการคำสั่งซื้อ
         </a>
 
-        {{-- ✅ เมนูใหม่: Store Profile (active) --}}
         <a href="{{ route('seller.profile.edit') }}"
            class="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-100 text-slate-900">
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5zm0 2c-4 0-8 2-8 5v1h16v-1c0-3-4-5-8-5z"/></svg>
-          Store Profeil
+          โปรไฟล์ร้านค้า
         </a>
       </nav>
     </div>

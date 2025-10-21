@@ -3,133 +3,152 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{{ config('app.name', 'My Shop') }}</title>
+  <title>{{ config('app.name', 'แพลตฟอร์มร้านผ้าคลุม') }}</title>
 
   <!-- Tailwind via CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
+    // โทนมินิมอล: sand(พื้น), ink(ข้อความ), olive(แอคเซนต์)
     tailwind.config = {
       theme: {
         extend: {
-          colors: { primary: { DEFAULT: '#2563eb' } },
-          boxShadow: { soft: '0 8px 30px rgba(0,0,0,0.08)' }
+          colors: {
+            sand: '#FAFAF7',
+            ink: '#111827',
+            olive: '#7C8B6A',
+          },
+          boxShadow: {
+            soft: '0 6px 24px rgba(0,0,0,0.06)',
+          },
+          borderRadius: {
+            xl2: '1rem',
+          }
         }
       }
     }
   </script>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased">
+<body class="bg-sand text-ink antialiased">
 
   {{-- ====== (แก้ได้) สินค้าแนะนำเริ่มต้น ถ้า Controller ไม่ส่งมา ====== --}}
   @php
     /** ถ้ามีการส่ง $featuredProducts มาจาก Controller จะใช้ค่านั้นแทน */
     $featuredProducts = $featuredProducts
       ?? [
-        // เปลี่ยนลิงก์รูป/ชื่อ/ราคา ได้เองตามต้องการ
-        ['name' => 'Delina Series', 'price' => 459,  'image' => 'https://scontent-bkk1-1.xx.fbcdn.net/v/t39.30808-6/557933130_713684545081007_4307792067794112513_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=833d8c&_nc_ohc=dTYE1dFGqtsQ7kNvwHi4Brd&_nc_oc=AdkYLlST_yR_2zKefXgrWvU-WoW1RHj6rKSip_XaxyeQOqEZMlGto_QSlvwMl4DBxDk&_nc_zt=23&_nc_ht=scontent-bkk1-1.xx&_nc_gid=n8By1iZgSFD80mmGpoEpKQ&oh=00_AffVa3_4DgY1TqVIbg6MuYc9SAgSW7I127-KPMNtDcxFOA&oe=68F91F81'],
-        ['name' => 'AMEERZAINI',  'price' => 459, 'image' => 'https://scontent-bkk1-1.xx.fbcdn.net/v/t39.30808-6/558176949_710047298778065_2231450108234336752_n.jpg?stp=dst-jpg_p960x960_tt6&_nc_cat=110&ccb=1-7&_nc_sid=833d8c&_nc_ohc=2R1H9Ui9nksQ7kNvwGN7rAo&_nc_oc=AdkuyX_8PkwOfWpnySSnFow501RbEScKpsa7J4h-Ro0QSy4RcWGmOK09WN1uJw6fPhk&_nc_zt=23&_nc_ht=scontent-bkk1-1.xx&_nc_gid=jKbKtzB-mafBKuRfmfYBLw&oh=00_AfeW0VRIZMikx1G_4RDAlRkR5FMkiCtpVPKKE9QJSOFFYg&oe=68F91BEC'],
-        ['name' => 'Colour Catalogue','price' => 459,  'image' => 'https://scontent-bkk1-1.xx.fbcdn.net/v/t39.30808-6/533590906_669630352819760_8559155399271928294_n.jpg?_nc_cat=111&ccb=1-7&_nc_sid=833d8c&_nc_ohc=aRrSUTQNDS8Q7kNvwHbqI3j&_nc_oc=AdkmNMTV2lXdSRoEBKTRZYCaPS_9qXE1mPqiJLBdr1IoidV8CwnRO7baYM1znGjVKbg&_nc_zt=23&_nc_ht=scontent-bkk1-1.xx&_nc_gid=yrFlXwbaJhlplZzhMzUkCw&oh=00_Afc_4Tt6fxBe9ExW9wAu60DZ6-y-8c9xNRVBRlHndTYj5A&oe=68ECE6CC'],
-        ['name' => 'Colour Catalogue',   'price' => 459,  'image' => 'https://scontent-bkk1-2.xx.fbcdn.net/v/t39.30808-6/533158328_669630259486436_797284571621129789_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=833d8c&_nc_ohc=iHI4qzY5sD4Q7kNvwEzroH7&_nc_oc=AdkZXEZTMwnRzzCWcrgSQM_6K84hoCnbYEsuXyPjWBuf0wC8m4y0oyZpzMcgadixULA&_nc_zt=23&_nc_ht=scontent-bkk1-2.xx&_nc_gid=Cry_ayj9mVdFc0_FW1c60w&oh=00_Aff1ECTSWQFBfPam5Dq9tA17R46fwz8oDzlHnd7h7PUOgg&oe=68ECF730'],
-        
-        ['name' => 'Colour Catalogue', 'price' => 459,  'image' => 'https://scontent-bkk1-1.xx.fbcdn.net/v/t39.30808-6/533175828_669630792819716_312639200855086374_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=833d8c&_nc_ohc=HIlJrP6OgfwQ7kNvwFGkKY3&_nc_oc=AdmE23grzlMjp-vlC1m8tSKizplL3BQVj_8uiUl6So1GSKemVBz6Z6CTqaRdmNGyxvQ&_nc_zt=23&_nc_ht=scontent-bkk1-1.xx&_nc_gid=9wvHvjVb-67__HsTJvktgA&oh=00_AffGKytReLCiLg4h_faNvSM15aklZUCfQNy8T6E1iHq92A&oe=68ECF718'],
-        ['name' => 'Colour Catalogue',  'price' => 459, 'image' => 'https://scontent-bkk1-1.xx.fbcdn.net/v/t39.30808-6/532583329_669630619486400_7802033679680961457_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=833d8c&_nc_ohc=D3-nxqdkfeEQ7kNvwHJIwAN&_nc_oc=Adkn8eHxJMD6A5ymxcLeapbEWFq5MKlWPl6WZsqEfqYpJ_gk3EP_mnvEHpNEVhRSKf8&_nc_zt=23&_nc_ht=scontent-bkk1-1.xx&_nc_gid=8kYHiMD4ToYynx1sZRfl9w&oh=00_AfeQk2abR7EnG0PEAt7sfjHkWZ42gdxQU-Fxi6tM8WWaXw&oe=68ECD27D'],
-        ['name' => 'Colour Catalogue','price' => 459,  'image' => 'https://scontent-bkk1-1.xx.fbcdn.net/v/t39.30808-6/533590906_669630352819760_8559155399271928294_n.jpg?_nc_cat=111&ccb=1-7&_nc_sid=833d8c&_nc_ohc=aRrSUTQNDS8Q7kNvwHbqI3j&_nc_oc=AdkmNMTV2lXdSRoEBKTRZYCaPS_9qXE1mPqiJLBdr1IoidV8CwnRO7baYM1znGjVKbg&_nc_zt=23&_nc_ht=scontent-bkk1-1.xx&_nc_gid=yrFlXwbaJhlplZzhMzUkCw&oh=00_Afc_4Tt6fxBe9ExW9wAu60DZ6-y-8c9xNRVBRlHndTYj5A&oe=68ECE6CC'],
-        ['name' => 'Colour Catalogue',   'price' => 459,  'image' => 'https://scontent-bkk1-2.xx.fbcdn.net/v/t39.30808-6/533158328_669630259486436_797284571621129789_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=833d8c&_nc_ohc=iHI4qzY5sD4Q7kNvwEzroH7&_nc_oc=AdkZXEZTMwnRzzCWcrgSQM_6K84hoCnbYEsuXyPjWBuf0wC8m4y0oyZpzMcgadixULA&_nc_zt=23&_nc_ht=scontent-bkk1-2.xx&_nc_gid=Cry_ayj9mVdFc0_FW1c60w&oh=00_Aff1ECTSWQFBfPam5Dq9tA17R46fwz8oDzlHnd7h7PUOgg&oe=68ECF730'],
+        ['name' => 'สินค้าแนะนำ',    'price' => 890, 'image' => 'https://scontent-bkk1-1.xx.fbcdn.net/v/t39.30808-6/543511326_686152997834162_653027445134899577_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=833d8c&_nc_ohc=sfEMIWREZ8cQ7kNvwGJ3aIP&_nc_oc=Adnd98oN98nOyzF6k6DcmfIhsCcno3sqnN7c-9joV3qNPxe2antXFH9yx4N5hGoyNm4&_nc_zt=23&_nc_ht=scontent-bkk1-1.xx&_nc_gid=ZJ4dackIQD-fSU05zofDmQ&oh=00_Afdb61fQlT4EZ2PaAVmf7_Xo2WY5EmRLkNJaf_ZampOwUw&oe=68FA627F'],
+        ['name' => 'สินค้าแนะนำ',    'price' => 159, 'image' => 'https://scontent-bkk1-1.xx.fbcdn.net/v/t39.30808-6/562052870_721281290987999_1659636245073653228_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=f727a1&_nc_ohc=HJE9lImVRyIQ7kNvwFFU9f7&_nc_oc=Adm5oluAjUaXHoJnm51DTJYHggD79fGs2SUJkN21yidsWUr_e_ZLBSdh0Ns7MUbIOic&_nc_zt=23&_nc_ht=scontent-bkk1-1.xx&_nc_gid=10hJoJ_3wYFTSDEzsMFD9Q&oh=00_AffXZlb8oD8D0JTt0fTHxWzJxnG9vj_wmq7cqWLi25435A&oe=68FA7FEB'],
+        ['name' => 'สินค้าแนะนำ',    'price' => 349, 'image' => 'https://scontent-bkk1-2.xx.fbcdn.net/v/t39.30808-6/565177023_721268264322635_2855992648106859369_n.jpg?stp=c0.83.1027.1027a_dst-jpg_s552x414_tt6&_nc_cat=109&ccb=1-7&_nc_sid=92e838&_nc_ohc=C_TeWZJJHsUQ7kNvwHarR-b&_nc_oc=AdkGcj-JvTXlMYDJbhT5W5vQpo7cLEKJyP3X2274oMByOgZ3ZFPxSBkt4TBAGXb5Enc&_nc_zt=23&_nc_ht=scontent-bkk1-2.xx&_nc_gid=wX7vZTNyLV5vDl5opkT9UQ&oh=00_AfdNy11bcPp1Kdus_afzMXz2v92zSMaU97QR1KgMOYTp2w&oe=68FA6D54'],
+        ['name' => 'สินค้าแนะนำ',    'price' => 459, 'image' => 'https://scontent-bkk1-2.xx.fbcdn.net/v/t39.30808-6/557642457_705564482559680_4938703705640271840_n.jpg?stp=dst-jpg_s552x414_tt6&_nc_cat=104&ccb=1-7&_nc_sid=714c7a&_nc_ohc=XlqPtkEJlRcQ7kNvwEdkfll&_nc_oc=Adme93vaIsKxraGrqj5GGQwcofXHyoC1JILBFdrAaoJ4U5QwaLgI9P8aI236su-bZZ4&_nc_zt=23&_nc_ht=scontent-bkk1-2.xx&_nc_gid=clUj7GgKVXiRAkTBYyevSA&oh=00_Afe_zF4V9Mq-qe4WkbdZ8Pjnrw4NWnoFlyS6FP9JQsOKUw&oe=68FA9522'],
+
+        ['name' => 'สินค้าแนะนำ',    'price' => 199, 'image' => 'https://scontent-bkk1-1.xx.fbcdn.net/v/t39.30808-6/534160880_669630686153060_8974598005241848058_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=833d8c&_nc_ohc=hOoe3V7Ylv0Q7kNvwGASq7Z&_nc_oc=AdldnmrAl_e5vpuKm-yf1Iz2SpBNl1-XiBYOMmaTYARKJtgYbIJgSpS9yQntJ5k5yi8&_nc_zt=23&_nc_ht=scontent-bkk1-1.xx&_nc_gid=cFREKY0PlLwL46bydVJqrA&oh=00_Aff9NRPrzE3tMlnqNRNPI_CJmluEya5bXwj_4SOLh6zwdg&oe=68FA85A4'],
+        ['name' => 'สินค้าแนะนำ',    'price' => 239, 'image' => 'https://scontent-bkk1-1.xx.fbcdn.net/v/t39.30808-6/555628281_701504792965649_1590756232358708746_n.jpg?stp=dst-jpg_s552x414_tt6&_nc_cat=110&ccb=1-7&_nc_sid=714c7a&_nc_ohc=a3u40TTZCZsQ7kNvwFB5j9H&_nc_oc=AdnpxWrQHPvPZfJkCraiFByCCxin9rfK2j08ETxZXBrmCIAU4H-tZBiuVfw-DVr0YJA&_nc_zt=23&_nc_ht=scontent-bkk1-1.xx&_nc_gid=E4jSy0n3qX1U3OJd7PD7tA&oh=00_AfdkN45Yud5WFErnc_F6W9ksKZIg9DDVdk_cJ_sXbrh1wA&oe=68FA9095'],
+        ['name' => 'สินค้าแนะนำ',    'price' => 2499, 'image' => 'https://scontent-bkk1-2.xx.fbcdn.net/v/t39.30808-6/557304104_705558459226949_9018066486250290772_n.jpg?stp=dst-jpg_s552x414_tt6&_nc_cat=102&ccb=1-7&_nc_sid=714c7a&_nc_ohc=ZXfHuSuHUG4Q7kNvwHnHzUD&_nc_oc=Adnof8WhtrNeqwKGFPZjQJeb2Lsa2XlIUBmZFYBp1BhYCUbWYnhlGZWh8H9ZvBhvnIg&_nc_zt=23&_nc_ht=scontent-bkk1-2.xx&_nc_gid=qYUkpzIvSKKB03ztI7JP5Q&oh=00_Aff0hmHS1W6htDqbB-bbEqhl-T7JlszTbGDgpdvbLJPyPQ&oe=68FA9710'],
+        ['name' => 'สินค้าแนะนำ',    'price' => 459, 'image' => 'https://scontent-bkk1-2.xx.fbcdn.net/v/t39.30808-6/554080766_701504126299049_6480003358265294630_n.jpg?stp=dst-jpg_s552x414_tt6&_nc_cat=105&ccb=1-7&_nc_sid=714c7a&_nc_ohc=BIChVpb6OSYQ7kNvwHvLBak&_nc_oc=AdlKCBOZlVWZCz4e4PLnSHGnymh2omIATkNrCpua_LKpgHwuHGQvOktncTSyV15qd2Q&_nc_zt=23&_nc_ht=scontent-bkk1-2.xx&_nc_gid=74FrOmFklq7U82q891X1eg&oh=00_Affo2FQtlj9lxx4kWCDxtK3S485aIDGRp0dlWsgWJlfm4g&oe=68FA99DB'],
       ];
   @endphp
 
-  {{-- ====== Navbar ====== --}}
-  <header class="sticky top-0 z-30 bg-white/80 backdrop-blur shadow-soft">
+  {{-- ====== Navbar (มินิมอล เรียบ สะอาด) ====== --}}
+  <header class="sticky top-0 z-30 bg-white/80 backdrop-blur border-b border-slate-100">
     <div class="max-w-7xl mx-auto h-16 px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-primary/30 to-blue-200 flex items-center justify-center shadow-md">
-          <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-              d="M12 2a10 10 0 100 20 10 10 0 000-20zM9 12l2 2 4-4"/>
+      <a href="{{ url('/') }}" class="flex items-center gap-2 group">
+        <div class="w-9 h-9 rounded-xl bg-olive/10 flex items-center justify-center shadow">
+          <svg class="w-5 h-5 text-olive" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M4 12h16M4 7h16M4 17h16" stroke-width="2"/>
           </svg>
         </div>
-        <span class="font-bold">แพลตฟอร์มร้านผ้าคลุม</span>
-        {{-- <span class="font-bold">{{ config('app.name', 'My Shop') }}</span> --}}
-      </div>
+        <span class="font-semibold tracking-wide group-hover:opacity-80 transition">
+          แพลตฟอร์มร้านผ้าคลุม
+          {{-- {{ config('app.name', 'แพลตฟอร์มร้านผ้าคลุม') }} --}}
+        </span>
+      </a>
 
-      <nav class="flex items-center gap-2">
+      <nav class="hidden md:flex items-center gap-6 text-sm">
+        <a href="#featured" class="hover:text-olive transition">สินค้าแนะนำ</a>
+        {{-- <a href="#" class="hover:text-olive transition">มาใหม่</a>
+        <a href="#" class="hover:text-olive transition">โปรโมชั่น</a> --}}
+      </nav>
+
+      <div class="flex items-center gap-2">
         @auth
-          <a href="{{ route('dashboard') }}"
-             class="rounded-lg border border-slate-200 px-3 py-1.5 hover:bg-slate-50">Dashboard</a>
+          {{-- <a href="{{ route('dashboard') }}"
+             class="rounded-xl border border-slate-200 px-3 py-1.5 hover:border-ink/30">Dashboard</a>
           <form method="POST" action="{{ route('logout') }}">
             @csrf
-            <button class="rounded-lg bg-slate-900 text-white px-3 py-1.5 hover:bg-slate-800">Logout</button>
-          </form>
+            <button class="rounded-xl bg-ink text-white px-3 py-1.5 hover:opacity-90">Logout</button>
+          </form> --}}
         @else
-          <a href="{{ route('login') }}" class="rounded-lg border border-slate-200 px-3 py-1.5 hover:bg-slate-50">Login</a>
-          <a href="{{ route('register') }}" class="rounded-lg bg-primary text-white px-3 py-1.5 hover:bg-blue-700">Register</a>
+          <a href="{{ route('login') }}" class="rounded-xl border border-slate-200 px-3 py-1.5 hover:border-ink/30">เข้าสู่ระบบ</a>
+          <a href="{{ route('register') }}" class="rounded-xl bg-ink text-white px-3 py-1.5 hover:opacity-90">สมัครสมาชิก</a>
         @endauth
-      </nav>
+      </div>
     </div>
   </header>
 
-  {{-- ====== Hero ====== --}}
-  <section class="relative">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 grid lg:grid-cols-2 gap-10 items-center">
+  {{-- ====== Hero (โทนอบอุ่น ภาพเด่น เว้นพื้นที่หายใจ) ====== --}}
+  <section class="bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20 grid lg:grid-cols-2 gap-10 items-center">
       <div>
-        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight">
-          ยินดีต้อนรับสู่ แพลตฟอร์มอีคอมเมิร์ซของเรา
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-tight">
+          เรียบง่าย มีระดับ<br>ผ้าคลุมสำหรับทุกวัน
         </h1>
-        <p class="mt-4 text-slate-600 text-lg">
-          เลือกช้อปสินค้าที่คัดสรรมาแล้วในสไตล์ของคุณ—เรียบง่าย สบายตา และใช้งานง่าย
+        <p class="mt-4 text-slate-600 text-base sm:text-lg">
+          โทนสีกลางแมทง่าย เนื้อผ้านุ่ม ใส่สบาย เหมาะกับทุกโอกาส
         </p>
         <div class="mt-6 flex flex-wrap gap-3">
           <a href="#featured"
-             class="rounded-xl bg-primary text-white px-5 py-3 hover:bg-blue-700 shadow">
-            ดูสินค้าแนะนำ
+             class="rounded-xl2 bg-ink text-white px-5 h-11 inline-flex items-center justify-center hover:opacity-90 shadow">
+            เลือกดูสินค้า
           </a>
           <a href="{{ route('login') }}"
-             class="rounded-xl border border-slate-200 px-5 py-3 hover:bg-slate-50">
+             class="rounded-xl2 border border-slate-200 px-5 h-11 inline-flex items-center justify-center hover:border-ink/30">
             เริ่มต้นใช้งาน
           </a>
         </div>
       </div>
 
       <div class="relative">
-        <div class="aspect-[16/10] rounded-2xl overflow-hidden shadow-soft bg-slate-200">
-          {{-- เปลี่ยนรูป Hero ตามชอบ (ใส่ asset('storage/..') ก็ได้) --}}
+        <div class="aspect-[16/10] rounded-xl2 overflow-hidden shadow-soft bg-sand">
+          {{-- เปลี่ยนรูป Hero ตามชอบ --}}
           <img
-            alt="Hero"
+            alt="Minimal Hijab Hero"
             class="w-full h-full object-cover"
-            src="https://scontent-bkk1-1.xx.fbcdn.net/v/t39.30808-6/529863620_664429120006550_5322723272537951143_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=f727a1&_nc_ohc=ar6zYLaYWwIQ7kNvwHkrani&_nc_oc=Adkgtn-Mt7Al_u3iWYZBfW_nMtIgiZhDAlbZG5NuzC8VWZ3kdSI7uUNjzZXzWBeFcqU&_nc_zt=23&_nc_ht=scontent-bkk1-1.xx&_nc_gid=Kz5ZXEfh3vUgrvaHCVWmgg&oh=00_AfeUtPgaaBUsQv9lIB6U3ZivWbDjAko5aISyNmcseJdikw&oe=68ECEF0B">
+            src="https://scontent-bkk1-1.xx.fbcdn.net/v/t39.30808-6/558058041_710047355444726_1473482335204980937_n.jpg?stp=c0.104.1290.1290a_dst-jpg_s552x414_tt6&_nc_cat=111&ccb=1-7&_nc_sid=50ad20&_nc_ohc=WjkrDLdGaQwQ7kNvwGMkXHT&_nc_oc=Adnp3pgpiXSZXXwn-AtzSjBG2Xvv4BnbLmgMrqXDkhhgvKudKhKCr5dPsEyxJ3D77tE&_nc_zt=23&_nc_ht=scontent-bkk1-1.xx&_nc_gid=Onrmbv8OPbC0SBBIgqadEg&oh=00_Afe89Wdz5z6qTcvCFUoXGIJ1SH9zF_gvJyKEa3mJYngvsw&oe=68FA77C6">
         </div>
       </div>
     </div>
   </section>
 
-  {{-- ====== Featured ====== --}}
+  {{-- ====== Featured (การ์ดมินิมอล เน้นรูป/ราคา) ====== --}}
   <section id="featured" class="pb-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="mb-6 flex items-end justify-between">
-        <div>
-          <h2 class="text-2xl font-bold">สินค้าแนะนำ</h2>
-        </div>
+        <h2 class="text-xl sm:text-2xl font-semibold">สินค้าแนะนำ</h2>
         @guest
-          <a href="{{ route('register') }}" class="text-primary hover:underline">สมัครสมาชิกเพื่อสั่งซื้อ</a>
+          <a href="{{ route('register') }}" class="text-olive hover:opacity-80 text-sm">สมัครสมาชิกเพื่อสั่งซื้อ</a>
         @endguest
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
         @foreach ($featuredProducts as $p)
-          <div class="bg-white rounded-2xl border shadow-soft overflow-hidden hover:-translate-y-0.5 transition">
-            <div class="aspect-[4/3] bg-slate-100">
-              <img src="{{ $p['image'] }}" alt="{{ $p['name'] }}" class="w-full h-full object-cover">
+          <div class="bg-white rounded-xl2 border border-slate-100 overflow-hidden shadow-soft hover:shadow transition group">
+            <div class="aspect-square bg-sand overflow-hidden">
+              <img src="{{ $p['image'] }}" alt="{{ $p['name'] }}" class="w-full h-full object-cover group-hover:scale-[1.02] transition">
             </div>
-            <div class="p-4">
-              <div class="font-semibold truncate">{{ $p['name'] }}</div>
-              <div class="mt-1 text-primary font-bold">฿{{ number_format((float) $p['price'], 2) }}</div>
-              <div class="mt-3">
+            <div class="p-3">
+              <div class="flex items-center justify-between gap-2">
+                <div class="font-medium truncate">{{ $p['name'] }}</div>
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-olive text-white">ใหม่</span>
+              </div>
+              <div class="mt-2 font-semibold">฿{{ number_format((float) $p['price']) }}</div>
+              <div class="mt-3 flex gap-2">
                 @auth
-                  <a href="{{ route('dashboard') }}" class="inline-flex items-center rounded-lg border px-3 py-1.5 hover:bg-slate-50">
+                  <a href="{{ route('dashboard') }}"
+                     class="inline-flex items-center rounded-xl border border-slate-200 px-3 h-9 hover:border-ink/30">
                     จัดการ
                   </a>
                 @else
-                  <a href="{{ route('login') }}" class="inline-flex items-center rounded-lg bg-primary text-white px-3 py-1.5 hover:bg-blue-700">
+                  <a href="{{ route('login') }}"
+                     class="inline-flex items-center rounded-xl bg-ink text-white px-3 h-9 hover:opacity-90">
                     เข้าสู่ระบบเพื่อสั่งซื้อ
                   </a>
                 @endauth
@@ -142,17 +161,36 @@
   </section>
 
   {{-- ====== Footer ====== --}}
-  <footer class="border-t bg-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-sm text-slate-500 flex items-center justify-between">
-      <span>© {{ date('Y') }} {{ config('app.name', 'My Shop') }}. All rights reserved.</span>
-      <div class="flex items-center gap-4">
-        <a href="#" class="hover:text-slate-700">Privacy</a>
-        <a href="#" class="hover:text-slate-700">Terms</a>
+  <footer class="border-t border-slate-100 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 grid md:grid-cols-3 gap-8 text-sm text-slate-600">
+      <div>
+        <div class="font-semibold mb-2 text-ink">เกี่ยวกับเรา</div>
+        <p>ผ้าคลุมสไตล์มินิมอล เนื้อดี ใส่สบาย แมทช์ง่ายทุกวัน</p>
+      </div>
+      <div>
+        {{-- <div class="font-semibold mb-2 text-ink">บริการลูกค้า</div> --}}
+        <ul class="space-y-1">
+          {{-- <li><a class="hover:text-olive" href="#">การจัดส่ง</a></li>
+          <li><a class="hover:text-olive" href="#">การคืนสินค้า</a></li> --}}
+        </ul>
+      </div>
+      <div>
+        <div class="font-semibold mb-2 text-ink">ติดตามเรา</div>
+        <div class="flex gap-3">
+          <a class="hover:text-olive" href="https://www.facebook.com/profile.php?id=100093184035157&sk=photos&locale=th_TH">Facebook</a>
+          {{-- <a class="hover:text-olive" href="#">Instagram</a> --}}
+        </div>
+      </div>
+    </div>
+    <div class="border-t border-slate-100">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-xs text-slate-500 flex items-center justify-between">
+        <span>© {{ date('Y') }} {{ config('app.name', 'แพลตฟอร์มร้านผ้าคลุม') }}. All rights reserved.</span>
+        <div class="flex items-center gap-4">
+          <a href="#" class="hover:text-ink">Privacy</a>
+          <a href="#" class="hover:text-ink">Terms</a>
+        </div>
       </div>
     </div>
   </footer>
 </body>
 </html>
-
-
-

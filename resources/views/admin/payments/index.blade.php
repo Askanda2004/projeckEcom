@@ -6,17 +6,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
+    // โทนมินิมอล: sand/ink/olive + เงานุ่ม
     tailwind.config = {
       theme: {
         extend: {
-          colors:{ primary:{DEFAULT:'#2563eb'} },
-          boxShadow:{ soft:'0 10px 30px rgba(2,6,23,.06)', card:'0 12px 40px rgba(2,6,23,.08)'}
+          colors: { sand:'#FAFAF7', ink:'#111827', olive:'#7C8B6A', primary:{DEFAULT:'#2563eb'} },
+          boxShadow: { soft:'0 6px 24px rgba(0,0,0,0.06)' },
+          borderRadius: { xl2:'1rem' }
         }
       }
     }
   </script>
 </head>
-<body class="bg-slate-50 text-slate-800">
+<body class="bg-sand text-ink antialiased">
 
   {{-- HEADER --}}
   <header class="sticky top-0 z-30 bg-white/80 backdrop-blur shadow">
@@ -30,7 +32,7 @@
         <span class="hidden md:inline text-slate-500">ตรวจสอบการชำระเงิน</span>
       </div>
       <form method="POST" action="{{ route('logout') }}"> @csrf
-        <button class="rounded-lg bg-slate-900 text-white px-3 py-1.5 hover:bg-slate-800">Logout</button>
+        <button class="rounded-lg bg-slate-900 text-white px-3 py-1.5 hover:bg-slate-800">ออกจากระบบ</button>
       </form>
     </div>
   </header>

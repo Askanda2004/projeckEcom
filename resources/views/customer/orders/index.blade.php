@@ -6,15 +6,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
-    tailwind.config = { theme:{ extend:{ colors:{ primary:{DEFAULT:'#2563eb'} }, boxShadow:{soft:'0 8px 30px rgba(0,0,0,0.08)'} } } }
+    // โทนมินิมอล: sand/ink/olive + เงานุ่ม
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { sand:'#FAFAF7', ink:'#111827', olive:'#7C8B6A', primary:{DEFAULT:'#2563eb'} },
+          boxShadow: { soft:'0 6px 24px rgba(0,0,0,0.06)' },
+          borderRadius: { xl2:'1rem' }
+        }
+      }
+    }
   </script>
 </head>
-<body class="bg-slate-50 text-slate-800">
+<body class="bg-sand text-ink antialiased">
+  <!-- พื้นหลัง glass ไล่เฉด -->
+  <div aria-hidden="true" class="pointer-events-none absolute inset-0 -z-10 bg-glass"></div>
 
   <!-- Header -->
-  <header class="sticky top-0 z-30 bg-white/80 backdrop-blur border-b">
+  <header class="sticky top-0 z-30 bg-white/85 backdrop-blur shadow-soft border-b border-slate-100">
     <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between gap-3">
-      <a href="{{ route('customer.shop') }}" class="font-semibold">&larr; กลับไปหน้าร้าน</a>
+      <a href="{{ route('customer.shop') }}" class="font-semibold text-slate-700 hover:text-primary transition">&larr; กลับไปหน้าร้าน</a>
       <div class="flex items-center gap-2">
         <a href="{{ route('customer.cart') }}" class="rounded-lg border border-slate-200 px-3 py-1.5 hover:bg-slate-100">ตะกร้า</a>
         <form method="POST" action="{{ route('logout') }}"> @csrf
@@ -24,13 +35,13 @@
     </div>
   </header>
 
-  <main class="max-w-7xl mx-auto px-4 py-6">
-    <div class="mb-4">
-      <h1 class="text-xl font-bold">ประวัติการสั่งซื้อของฉัน</h1>
+  <main class="max-w-7xl mx-auto px-4 py-8">
+    <div class="mb-5">
+      <h1 class="text-2xl font-bold text-slate-800">ประวัติการสั่งซื้อของฉัน</h1>
       <p class="text-sm text-slate-500">ดูรายการที่สั่งซื้อทั้งหมดของบัญชีนี้</p>
     </div>
 
-    <div class="bg-white rounded-2xl shadow-soft overflow-hidden">
+    <div class="bg-white rounded-2xl shadow-soft overflow-hidden border border-slate-100">
       <div class="overflow-x-auto">
         <table class="min-w-full text-sm">
           <thead class="bg-slate-50 text-slate-600">
@@ -44,19 +55,13 @@
           </thead>
           <tbody>
             @forelse ($orders as $o)
-              <tr class="hover:bg-slate-50">
+              <tr class="hover:bg-slate-50 transition">
                 <td class="px-4 py-3 border-b">
-                    {{ \Illuminate\Support\Carbon::parse($o->order_date ?? $o->created_at)->format('d/m/Y H:i') }}
-                  {{-- <div class="font-semibold">#{{ $o->order_id ?? $o->id }}</div>
-                  <div class="text-xs text-slate-500">
-                    {{ \Illuminate\Support\Carbon::parse($o->order_date ?? $o->created_at)->format('d/m/Y H:i') }}
-                  </div> --}}
+                  {{ \Illuminate\Support\Carbon::parse($o->order_date ?? $o->created_at)->format('d/m/Y H:i') }}
                 </td>
                 <td class="px-4 py-3 border-b">
-                  <div class="text-sm">{{ $o->shipping_name ?? '—' }} • {{ $o->shipping_phone ?? '—' }}</div>
-                  <div class="text-xs text-slate-500">
-                    {{ \Illuminate\Support\Str::limit($o->shipping_address ?? '—', 90) }}
-                  </div>
+                  <div class="text-sm font-medium text-slate-700">{{ $o->shipping_name ?? '—' }} • {{ $o->shipping_phone ?? '—' }}</div>
+                  <div class="text-xs text-slate-500">{{ \Illuminate\Support\Str::limit($o->shipping_address ?? '—', 90) }}</div>
                 </td>
                 <td class="px-4 py-3 border-b text-right font-semibold">
                   ฿{{ number_format((float)($o->total_amount ?? 0), 2) }}
@@ -80,7 +85,7 @@
                     ดูรายละเอียด
                   </button>
 
-                  {{-- Modal รายการสินค้าในคำสั่งซื้อ --}}
+                  <!-- Modal รายละเอียดคำสั่งซื้อ -->
                   <dialog id="dlg-{{ $o->order_id ?? $o->id }}" class="rounded-2xl p-0 w-full max-w-2xl">
                     <form method="dialog">
                       <div class="p-4 sm:p-6 border-b">
@@ -114,7 +119,6 @@
                             @forelse ($o->items ?? [] as $it)
                               @php
                                 $prod = $it->product;
-                                // เลือกรูปหลักจาก product_images ถ้ามี
                                 $thumb = $prod?->image_url;
                                 if ($prod && method_exists($prod, 'images')) {
                                   $primary = $prod->relationLoaded('images')
@@ -179,6 +183,5 @@
       </div>
     </div>
   </main>
-
 </body>
 </html>

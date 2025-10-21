@@ -2,225 +2,247 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <title>Checkout</title>
+  <title>ยืนยันคำสั่งซื้อ • {{ config('app.name','แพลตฟอร์มร้านผ้าคลุม') }}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Tailwind via CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
+    // โทนมินิมอล: sand/ink/olive + เงานุ่ม
     tailwind.config = {
       theme: {
         extend: {
-          colors: { primary: { DEFAULT: '#2563eb' } },
-          boxShadow: { soft: '0 8px 30px rgba(0,0,0,0.08)' }
+          colors: { sand:'#FAFAF7', ink:'#111827', olive:'#7C8B6A', primary:{DEFAULT:'#2563eb'} },
+          boxShadow: { soft:'0 6px 24px rgba(0,0,0,0.06)' },
+          borderRadius: { xl2:'1rem' }
         }
       }
     }
   </script>
 </head>
-<body class="bg-slate-50 text-slate-800">
+<body class="bg-sand text-ink antialiased">
 
   <!-- Header -->
-  <header class="sticky top-0 z-30 bg-white/90 backdrop-blur shadow-soft">
-    <div class="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
+  <header class="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-slate-100">
+    <div class="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
       <h1 class="font-semibold">ยืนยันคำสั่งซื้อ</h1>
-      <a href="{{ route('customer.cart') }}" class="text-sm text-slate-600 hover:text-slate-900">กลับตะกร้า</a>
+      <a href="{{ route('customer.cart') }}" class="text-sm hover:opacity-80">กลับตะกร้า</a>
     </div>
   </header>
 
-  <main class="max-w-4xl mx-auto px-4 py-8 space-y-6">
+  @php
+    // cart: product_id => [name, price, qty, image_url/image, size, color, ...]
+    $cart  = $cart  ?? session('cart', []);
+    $total = (float)($total ?? collect($cart)->sum(fn($r) => (float)($r['price'] ?? 0) * (int)($r['qty'] ?? 0)));
+  @endphp
 
+  <main class="max-w-7xl mx-auto px-4 py-8">
     {{-- Flash messages --}}
     @if (session('status'))
-      <div class="rounded-lg bg-emerald-50 text-emerald-800 px-4 py-3 shadow-soft">
+      <div class="mb-6 rounded-xl bg-emerald-50 text-emerald-700 px-4 py-3 border border-emerald-200 shadow-soft">
         {{ session('status') }}
       </div>
     @endif
     @if (session('error'))
-      <div class="rounded-lg bg-rose-50 text-rose-700 px-4 py-3 shadow-soft">
+      <div class="mb-6 rounded-xl bg-rose-50 text-rose-700 px-4 py-3 border border-rose-200 shadow-soft">
         {{ session('error') }}
       </div>
     @endif
 
-    @php
-      // cart: product_id => [name, price, qty, image_url/image, size, color, ...]
-      $cart  = $cart  ?? session('cart', []);
-      $total = $total ?? collect($cart)->sum(fn($r) => (float)($r['price'] ?? 0) * (int)($r['qty'] ?? 0));
-    @endphp
-
-    {{-- รายการสินค้า --}}
-    <section class="bg-white rounded-2xl shadow-soft border">
-      <div class="p-5 border-b">
-        <h2 class="text-base font-semibold">รายการสินค้า</h2>
+    @if(empty($cart))
+      <div class="rounded-2xl bg-white border border-slate-100 shadow-soft p-10 text-center">
+        <div class="mx-auto w-12 h-12 rounded-full bg-olive/10 text-olive grid place-items-center mb-3">
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <circle cx="9" cy="20" r="1"/><circle cx="16" cy="20" r="1"/><path d="M3 3h2l.4 2M7 13h9l3-8H6.4" stroke-width="2"/>
+          </svg>
+        </div>
+        <div class="font-medium">ตะกร้าของคุณว่างเปล่า</div>
+        <a href="{{ route('customer.shop') }}" class="mt-4 inline-flex items-center justify-center h-11 px-5 rounded-xl bg-ink text-white hover:opacity-90">เลือกสินค้า</a>
       </div>
+    @else
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {{-- ========== ฟอร์มที่อยู่ + ชำระเงิน ========== --}}
+        <section class="lg:col-span-7">
+          <div class="bg-white rounded-2xl border border-slate-100 shadow-soft">
+            <div class="p-5 border-b border-slate-100">
+              <h2 class="text-base font-semibold">ข้อมูลจัดส่ง & การชำระเงิน</h2>
+            </div>
 
-      @if(empty($cart))
-        <div class="p-6 text-center text-slate-500">ตะกร้าของคุณว่างเปล่า</div>
-      @else
-        <div class="divide-y">
-          @foreach($cart as $product_id => $row)
-            @php
-              $name  = $row['name'] ?? '-';
-              $price = (float)($row['price'] ?? 0);
-              $qty   = (int)  ($row['qty']   ?? 0);
-              $sum   = $price * $qty;
+            <form id="checkoutForm" method="POST" action="{{ route('customer.checkout.place') }}" enctype="multipart/form-data" class="p-5 space-y-4">
+              @csrf
 
-              $img    = $row['image_url'] ?? ($row['image'] ?? null);
-              $imgSrc = $img
-                        ? (\Illuminate\Support\Str::startsWith($img, ['http://','https://'])
-                              ? $img
-                              : asset('storage/'.$img))
-                        : null;
-            @endphp
-            <div class="p-5 flex items-center justify-between gap-4">
-              <div class="flex items-center gap-3 min-w-0">
-                @if($imgSrc)
-                  <img src="{{ $imgSrc }}" alt="{{ $name }}" class="w-14 h-14 rounded-lg object-cover border">
-                @else
-                  <div class="w-14 h-14 rounded-lg bg-slate-100 border"></div>
-                @endif
-                <div class="min-w-0">
-                  <div class="font-medium truncate">{{ $name }}</div>
-                  <div class="text-xs text-slate-500">
-                    ขนาด: {{ $row['size'] ?? '—' }} | สี: {{ $row['color'] ?? '—' }} | จำนวน x{{ $qty }}
+              {{-- ชื่อผู้รับ --}}
+              <div>
+                <label class="block text-sm font-medium">ชื่อผู้รับ</label>
+                <input
+                  name="shipping_name"
+                  value="{{ old('shipping_name', auth()->user()->name ?? '') }}"
+                  class="mt-1 w-full h-11 rounded-xl border border-slate-200 bg-white/70 focus:bg-white px-3 outline-none focus:ring-2 focus:ring-olive/30"
+                  required>
+                @error('shipping_name') <p class="text-sm text-rose-600 mt-1">{{ $message }}</p> @enderror
+              </div>
+
+              {{-- เบอร์โทร --}}
+              <div>
+                <label class="block text-sm font-medium">เบอร์โทร</label>
+                <input
+                  name="shipping_phone"
+                  value="{{ old('shipping_phone') }}"
+                  placeholder="0812345678"
+                  class="mt-1 w-full h-11 rounded-xl border border-slate-200 bg-white/70 focus:bg-white px-3 outline-none focus:ring-2 focus:ring-olive/30"
+                  required>
+                @error('shipping_phone') <p class="text-sm text-rose-600 mt-1">{{ $message }}</p> @enderror
+              </div>
+
+              {{-- ที่อยู่จัดส่ง --}}
+              <div>
+                <label class="block text-sm font-medium">ที่อยู่จัดส่ง</label>
+                <textarea
+                  name="shipping_address"
+                  rows="3"
+                  class="mt-1 w-full rounded-xl border border-slate-200 bg-white/70 focus:bg-white px-3 py-2 outline-none focus:ring-2 focus:ring-olive/30"
+                  required>{{ old('shipping_address') }}</textarea>
+                @error('shipping_address') <p class="text-sm text-rose-600 mt-1">{{ $message }}</p> @enderror
+              </div>
+
+              {{-- ช่องทางการชำระเงิน --}}
+              <div>
+                <label class="block text-sm font-medium mb-1">ช่องทางการชำระเงิน</label>
+                <select
+                  name="payment_method"
+                  id="payment_method"
+                  class="w-full h-11 rounded-xl border border-slate-200 bg-white/70 focus:bg-white px-3 outline-none focus:ring-2 focus:ring-olive/30"
+                  required>
+                  <option value="">— เลือกช่องทาง —</option>
+                  <option value="cod" @selected(old('payment_method')=='cod')>เก็บเงินปลายทาง (COD)</option>
+                  <option value="transfer" @selected(old('payment_method')=='transfer')>โอนผ่านบัญชี / QR Code</option>
+                </select>
+                @error('payment_method') <p class="text-sm text-rose-600 mt-1">{{ $message }}</p> @enderror
+              </div>
+
+              {{-- ส่วนแสดง QR และอัปโหลดสลิป --}}
+              <div id="payment_qr_section" class="{{ old('payment_method')=='transfer' ? '' : 'hidden' }}">
+                <div class="mt-2 bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
+                  <p class="text-sm font-medium">สแกน QR เพื่อชำระเงิน</p>
+                  <img src="{{ asset('images/QR.jpg') }}" alt="QR Code" class="w-48 h-48 object-contain rounded-lg border bg-white">
+                  <p class="text-xs text-slate-600">
+                    โปรดชำระยอดรวมทั้งหมด <span class="font-semibold text-ink">฿{{ number_format($total,2) }}</span>
+                    แล้วอัปโหลดสลิปการชำระเงินเพื่อยืนยัน
+                  </p>
+
+                  <div>
+                    <label class="block text-sm font-medium">อัปโหลดหลักฐานการชำระเงิน</label>
+                    <input
+                      type="file"
+                      name="payment_slip"
+                      id="payment_slip"
+                      accept="image/*"
+                      class="mt-1 block w-full text-sm rounded-xl border border-slate-200 bg-white/70 focus:bg-white px-3 py-2 outline-none focus:ring-2 focus:ring-olive/30">
+                    @error('payment_slip') <p class="text-sm text-rose-600 mt-1">{{ $message }}</p> @enderror
                   </div>
                 </div>
               </div>
-              <div class="text-right">
-                <div class="text-sm text-slate-500">฿{{ number_format($price, 2) }}/ชิ้น</div>
-                <div class="font-semibold">฿{{ number_format($sum, 2) }}</div>
+
+              {{-- Checkbox ยืนยัน --}}
+              <label class="inline-flex items-center gap-2 text-sm">
+                <input type="checkbox" name="confirm" value="1"
+                       class="rounded border-slate-300"
+                       {{ old('confirm') ? 'checked' : '' }}>
+                ยืนยันข้อมูลถูกต้องและยอมรับการสั่งซื้อ
+              </label>
+              @error('confirm') <p class="text-sm text-rose-600 -mt-2">{{ $message }}</p> @enderror
+
+              {{-- ปุ่ม --}}
+              <div class="pt-2 grid grid-cols-2 gap-3">
+                <a href="{{ route('customer.cart') }}" class="h-11 grid place-items-center rounded-xl border border-slate-200 hover:border-ink/30">
+                  กลับตะกร้า
+                </a>
+                <button id="placeBtn" class="h-11 rounded-xl bg-ink text-white hover:opacity-90">
+                  ยืนยันสั่งซื้อ
+                </button>
               </div>
+            </form>
+          </div>
+        </section>
+
+        {{-- ========== สรุปคำสั่งซื้อ (Sticky) ========== --}}
+        <aside class="lg:col-span-5">
+          <div class="lg:sticky lg:top-24 bg-white rounded-2xl border border-slate-100 shadow-soft overflow-hidden">
+            <div class="p-5 border-b border-slate-100">
+              <h3 class="font-semibold">สรุปคำสั่งซื้อ</h3>
             </div>
-          @endforeach
-        </div>
 
-        <div class="p-5 border-t flex items-center justify-between">
-          <div class="text-slate-500">ยอดรวม</div>
-          <div class="text-2xl font-bold">฿{{ number_format($total, 2) }}</div>
-        </div>
-      @endif
-    </section>
+            <div class="max-h-[340px] overflow-auto divide-y">
+              @foreach($cart as $product_id => $row)
+                @php
+                  $name  = $row['name'] ?? '-';
+                  $price = (float)($row['price'] ?? 0);
+                  $qty   = (int)  ($row['qty']   ?? 0);
+                  $sum   = $price * $qty;
 
-    {{-- ฟอร์มที่อยู่จัดส่ง / ยืนยันคำสั่งซื้อ --}}
-    <section class="bg-white rounded-2xl shadow-soft border">
-      <div class="p-5 border-b">
-        <h2 class="text-base font-semibold">ที่อยู่จัดส่ง</h2>
-      </div>
+                  $img    = $row['image_url'] ?? ($row['image'] ?? null);
+                  $imgSrc = $img ? (\Illuminate\Support\Str::startsWith($img, ['http://','https://']) ? $img : asset('storage/'.$img)) : null;
+                @endphp
+                <div class="p-4 flex items-center gap-3">
+                  <div class="w-14 h-14 rounded-lg overflow-hidden bg-sand border border-slate-100 shrink-0">
+                    @if($imgSrc)
+                      <img src="{{ $imgSrc }}" alt="{{ $name }}" class="w-full h-full object-cover">
+                    @endif
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <div class="text-sm font-medium truncate">{{ $name }}</div>
+                    <div class="text-xs text-slate-600 truncate">
+                      ขนาด: {{ $row['size'] ?? '—' }} • สี: {{ $row['color'] ?? '—' }}
+                    </div>
+                  </div>
+                  <div class="text-right text-sm">
+                    <div class="text-slate-600">x{{ $qty }}</div>
+                    <div class="font-medium">฿{{ number_format($sum,2) }}</div>
+                  </div>
+                </div>
+              @endforeach
+            </div>
 
-      <form method="POST" action="{{ route('customer.checkout.place') }}" enctype="multipart/form-data" class="p-5 space-y-4">
-        @csrf
-
-        {{-- ชื่อผู้รับ --}}
-        <div>
-          <label class="block text-sm font-medium">ชื่อผู้รับ</label>
-          <input
-            name="shipping_name"
-            value="{{ old('shipping_name', auth()->user()->name ?? '') }}"
-            class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 focus:border-primary focus:ring-2 focus:ring-blue-100"
-            required>
-          @error('shipping_name') <p class="text-sm text-rose-600 mt-1">{{ $message }}</p> @enderror
-        </div>
-
-        {{-- เบอร์โทร --}}
-        <div>
-          <label class="block text-sm font-medium">เบอร์โทร</label>
-          <input
-            name="shipping_phone"
-            value="{{ old('shipping_phone') }}"
-            placeholder="0812345678"
-            class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 focus:border-primary focus:ring-2 focus:ring-blue-100"
-            required>
-          @error('shipping_phone') <p class="text-sm text-rose-600 mt-1">{{ $message }}</p> @enderror
-        </div>
-
-        {{-- ที่อยู่จัดส่ง --}}
-        <div>
-          <label class="block text-sm font-medium">ที่อยู่จัดส่ง</label>
-          <textarea
-            name="shipping_address"
-            rows="3"
-            class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 focus:border-primary focus:ring-2 focus:ring-blue-100"
-            required>{{ old('shipping_address') }}</textarea>
-          @error('shipping_address') <p class="text-sm text-rose-600 mt-1">{{ $message }}</p> @enderror
-        </div>
-
-        {{-- ช่องทางการชำระเงิน --}}
-        <div>
-          <label class="block text-sm font-medium mb-1">ช่องทางการชำระเงิน</label>
-          <select
-            name="payment_method"
-            id="payment_method"
-            class="w-full rounded-xl border border-slate-200 px-3 py-2 focus:border-primary focus:ring-2 focus:ring-blue-100"
-            required>
-            <option value="">— เลือกช่องทาง —</option>
-            <option value="cod" @selected(old('payment_method')=='cod')>เก็บเงินปลายทาง (COD)</option>
-            <option value="transfer" @selected(old('payment_method')=='transfer')>โอนผ่านบัญชี / QR Code</option>
-          </select>
-          @error('payment_method') <p class="text-sm text-rose-600 mt-1">{{ $message }}</p> @enderror
-        </div>
-
-        {{-- ส่วนแสดง QR และอัปโหลดสลิป --}}
-        <div id="payment_qr_section" class="{{ old('payment_method')=='transfer' ? '' : 'hidden' }}">
-          <div class="mt-3 bg-slate-50 border rounded-xl p-4 space-y-3">
-            <p class="text-sm font-medium">สแกน QR เพื่อชำระเงิน</p>
-
-            {{-- แสดงภาพ QR --}}
-            <img src="{{ asset('images/QR.jpg') }}" alt="QR Code" class="w-48 h-48 object-contain rounded-lg border bg-white">
-
-            <p class="text-xs text-slate-500">
-              โปรดชำระยอดรวมทั้งหมด <span class="font-semibold text-slate-700">฿{{ number_format($total,2) }}</span>  
-              แล้วอัปโหลดสลิปการชำระเงินเพื่อยืนยัน
-            </p>
-
-            {{-- อัปโหลดสลิป --}}
-            <div>
-              <label class="block text-sm font-medium">อัปโหลดหลักฐานการชำระเงิน</label>
-              <input
-                type="file"
-                name="payment_slip"
-                id="payment_slip"
-                accept="image/*"
-                class="mt-1 block w-full text-sm rounded-lg border border-slate-200 px-3 py-2 focus:border-primary focus:ring-2 focus:ring-blue-100">
-              @error('payment_slip') <p class="text-sm text-rose-600 mt-1">{{ $message }}</p> @enderror
+            <div class="p-5 border-t border-slate-100 space-y-2 text-sm">
+              <div class="flex items-center justify-between">
+                <span class="text-slate-600">ยอดรวม</span>
+                <span class="font-medium">฿{{ number_format($total, 2) }}</span>
+              </div>
+              {{-- เผื่อส่วนลด/ค่าส่งในอนาคต --}}
+              {{-- <div class="flex items-center justify-between"><span>ค่าจัดส่ง</span><span>฿—</span></div> --}}
             </div>
           </div>
-        </div>
-
-        {{-- Checkbox ยืนยัน --}}
-        <label class="inline-flex items-center gap-2 text-sm">
-          <input type="checkbox" name="confirm" value="1"
-                class="rounded border-slate-300"
-                {{ old('confirm') ? 'checked' : '' }}>
-          ยืนยันการสั่งซื้อ
-        </label>
-        @error('confirm') <p class="text-sm text-rose-600 -mt-2">{{ $message }}</p> @enderror
-
-        {{-- ปุ่ม --}}
-        <div class="pt-2 flex gap-3">
-          <a href="{{ route('customer.cart') }}" class="flex-1 text-center rounded-xl border border-slate-200 px-4 py-2.5 hover:bg-slate-50">
-            กลับไปตะกร้า
-          </a>
-          <button class="flex-1 rounded-xl bg-primary text-white px-5 py-2.5 hover:bg-blue-700">
-            ยืนยันสั่งซื้อ
-          </button>
-        </div>
-      </form>
-
-      <script>
-        // toggle แสดง QR เมื่อเลือกวิธีโอนเงิน
-        document.addEventListener('DOMContentLoaded', function() {
-          const select = document.getElementById('payment_method');
-          const qrBox  = document.getElementById('payment_qr_section');
-          select?.addEventListener('change', () => {
-            if (select.value === 'transfer') {
-              qrBox.classList.remove('hidden');
-              document.getElementById('payment_slip').required = true;
-            } else {
-              qrBox.classList.add('hidden');
-              document.getElementById('payment_slip').required = false;
-            }
-          });
-        });
-      </script>
-    </section>
+        </aside>
+      </div>
+    @endif
   </main>
+
+  <script>
+    // toggle แสดง QR เมื่อเลือกโอนเงิน + บังคับแนบสลิป
+    document.addEventListener('DOMContentLoaded', function() {
+      const select = document.getElementById('payment_method');
+      const qrBox  = document.getElementById('payment_qr_section');
+      const slip   = document.getElementById('payment_slip');
+      const place  = document.getElementById('placeBtn');
+      const form   = document.getElementById('checkoutForm');
+
+      function syncQR() {
+        if (!select) return;
+        const isTransfer = select.value === 'transfer';
+        qrBox?.classList.toggle('hidden', !isTransfer);
+        if (slip) slip.required = isTransfer;
+      }
+      select?.addEventListener('change', syncQR);
+      syncQR();
+
+      // กันกดซ้ำขณะส่งฟอร์ม
+      form?.addEventListener('submit', () => {
+        if (place) {
+          place.disabled = true;
+          place.textContent = 'กำลังส่งคำสั่งซื้อ...';
+          place.classList.add('opacity-70', 'cursor-not-allowed');
+        }
+      });
+    });
+  </script>
 </body>
 </html>

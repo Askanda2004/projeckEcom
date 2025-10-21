@@ -9,21 +9,19 @@
 
     {{-- กำหนด theme เล็กน้อย --}}
     <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              primary: { DEFAULT: '#2563eb' }, // blue-600
-            },
-            boxShadow: {
-              soft: '0 6px 30px rgba(0,0,0,0.08)',
-            }
-          }
+    // โทนมินิมอล: sand/ink/olive + เงานุ่ม
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { sand:'#FAFAF7', ink:'#111827', olive:'#7C8B6A', primary:{DEFAULT:'#2563eb'} },
+          boxShadow: { soft:'0 6px 24px rgba(0,0,0,0.06)' },
+          borderRadius: { xl2:'1rem' }
         }
       }
-    </script>
+    }
+  </script>
 </head>
-<body class="bg-slate-50 text-slate-800">
+<body class="bg-sand text-ink antialiased">
 
     <!-- HEADER -->
     <header class="sticky top-0 bg-white/90 backdrop-blur shadow-soft z-30">
@@ -33,13 +31,13 @@
             <!-- simple logo -->
             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="2" d="M4 7h16M4 12h16M4 17h16"/></svg>
           </div>
-          <span class="font-bold">Admin Panel</span>
+          <span class="font-bold">ผู้ดูแลระบบ</span>
         </div>
 
         <div class="flex items-center gap-2">
           <form method="POST" action="{{ route('logout') }}" class="ml-2">
             @csrf
-            <button class="px-3 py-1.5 text-sm rounded-lg bg-slate-900 text-white hover:bg-slate-800">Logout</button>
+            <button class="px-3 py-1.5 text-sm rounded-lg bg-slate-900 text-white hover:bg-slate-800">ออกจากระบบ</button>
           </form>
         </div>
       </div>
@@ -70,7 +68,7 @@
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
               </svg>
-              Manage Users (All)
+              จัดการผู้ใช้ (ทั้งหมด)
             </a>
 
             {{-- 🔹 Users Customer --}}
@@ -79,7 +77,7 @@
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 12c2.7 0 4.88-2.18 4.88-4.88S14.7 2.24 12 2.24 7.12 4.42 7.12 7.12 9.3 12 12 12zm0 2.4c-3.25 0-9.6 1.63-9.6 4.88V22h19.2v-2.72c0-3.25-6.35-4.88-9.6-4.88z"/>
               </svg>
-              Users Customer
+              บัญชีลูกค้า
             </a>
 
             {{-- 🔹 Users Seller --}}
@@ -88,7 +86,7 @@
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M3 6l3 7h11l3-7H3zm3 9c-1.66 0-3 1.34-3 3v1h18v-1c0-1.66-1.34-3-3-3H6z"/>
               </svg>
-              Users Seller
+              บัญชีร้านค้า
             </a>
 
             {{-- 🔹 Users Admin --}}
@@ -97,7 +95,7 @@
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 11.99V5.5l6 2.67V11c0 4.02-2.68 7.96-6 9.27V12.99z"/>
               </svg>
-              Users Admin
+              บัญชีผู้ดูแลระบบ
             </a>
 
             {{-- ✅ เพิ่มเมนูตรวจสอบการชำระเงิน --}}
@@ -119,7 +117,7 @@
         <!-- Title + actions -->
         <div class="flex items-center justify-between">
           <h1 class="text-2xl font-bold">
-            {{ $activeAll ? 'Manage User Accounts' : 'Manage User Accounts • '.ucfirst($filterRole) }}
+            {{ $activeAll ? 'จัดการบัญชีผู้ใช้' : 'จัดการบัญชีผู้ใช้ • '.ucfirst($filterRole) }}
           </h1>
 
           <!-- Search -->
@@ -157,7 +155,7 @@
                 <button class="absolute right-1 top-1/2 -translate-y-1/2 rounded-full px-5 py-2.5
                                bg-blue-600 text-white text-sm font-medium hover:bg-blue-700
                                active:scale-[.98] transition-all shadow-md">
-                  Search
+                  ค้นหา
                 </button>
               </div>
             </div>
@@ -188,7 +186,7 @@
           <div class="p-4 sm:p-6 border-b border-slate-100">
             <div class="flex items-center justify-between">
               <div class="text-slate-500 text-sm">
-                Total users: <strong>{{ $users->total() }}</strong>
+                ผู้ใช้ทั้งหมด: <strong>{{ $users->total() }}</strong>
                 @if(!$activeAll)
                   <span class="ml-2 text-slate-400">(Role: {{ ucfirst($filterRole) }})</span>
                 @endif
@@ -206,11 +204,11 @@
             <table class="min-w-full text-sm">
               <thead>
                 <tr class="bg-slate-50 text-slate-600">
-                  <th class="text-left font-semibold px-4 py-3 border-b">Name</th>
-                  <th class="text-left font-semibold px-4 py-3 border-b">Email</th>
-                  <th class="text-left font-semibold px-4 py-3 border-b">Role</th>
-                  <th class="text-left font-semibold px-4 py-3 border-b w-28">Edit</th>
-                  <th class="text-left font-semibold px-4 py-3 border-b w-28">Delete</th>
+                  <th class="text-left font-semibold px-4 py-3 border-b">ชื่อ</th>
+                  <th class="text-left font-semibold px-4 py-3 border-b">อีเมล</th>
+                  <th class="text-left font-semibold px-4 py-3 border-b">บทบาท</th>
+                  <th class="text-left font-semibold px-4 py-3 border-b w-28">แก้ไข</th>
+                  <th class="text-left font-semibold px-4 py-3 border-b w-28">ลบ</th>
                 </tr>
               </thead>
               <tbody>
@@ -234,7 +232,7 @@
                       <a href="{{ route('admin.users.edit', $user) }}"
                          class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50">
                         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
-                        Edit
+                        แก้ไข
                       </a>
                     </td>
                     <td class="px-4 py-3 border-b">

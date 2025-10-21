@@ -26,13 +26,13 @@
         <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="2" d="M4 7h16M4 12h16M4 17h16"/></svg>
         </div>
-        <span class="font-bold">Seller Dashboard</span>
+        <span class="font-bold">ผู้ขาย</span>
       </div>
       <div class="flex items-center gap-2">
-        <a href="{{ route('dashboard') }}" class="text-sm text-slate-600 hover:text-slate-900">Home</a>
+        {{-- <a href="{{ route('dashboard') }}" class="text-sm text-slate-600 hover:text-slate-900">Home</a> --}}
         <form method="POST" action="{{ route('logout') }}">
           @csrf
-          <button class="px-3 py-1.5 text-sm rounded-lg bg-slate-900 text-white hover:bg-slate-800">Logout</button>
+          <button class="px-3 py-1.5 text-sm rounded-lg bg-slate-900 text-white hover:bg-slate-800">ออกจากระบบ</button>
         </form>
       </div>
     </div>
@@ -67,21 +67,21 @@
         <nav class="space-y-1">
           <a href="{{ route('seller.reports.index') }}" class="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-100 text-slate-900">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
-            Analytics & Reports
+            การวิเคราะห์และรายงาน
           </a>
           <a href="{{ route('seller.products.index') }}" class="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-100">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M20 6H4v12h16V6zM8 8h8v2H8V8zm0 4h8v2H8v-2z"/></svg>
-            Product Management
+            การจัดการสินค้า
           </a>
           <a href="{{ route('seller.orders.index') }}" class="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-100">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M3 7l9-4 9 4-9 4-9-4zm0 6l9 4 9-4m-9 4v6"/></svg>
-            Order Management
+            การจัดการคำสั่งซื้อ
           </a>
 
           <a href="{{ route('seller.profile.edit') }}"
             class="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-100">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.9-2.2 4.9-4.9S14.7 2.2 12 2.2 7.1 4.4 7.1 7.1 9.3 12 12 12zm0 2.4c-3.3 0-9.6 1.6-9.6 4.9V22h19.2v-2.7c0-3.3-6.3-4.9-9.6-4.9z"/></svg>
-            Store Profeil
+            โปรไฟล์ร้านค้า
           </a>
         </nav>
       </div>
