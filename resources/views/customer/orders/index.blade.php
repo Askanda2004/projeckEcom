@@ -29,7 +29,7 @@
       <div class="flex items-center gap-2">
         <a href="{{ route('customer.cart') }}" class="rounded-lg border border-slate-200 px-3 py-1.5 hover:bg-slate-100">ตะกร้า</a>
         <form method="POST" action="{{ route('logout') }}"> @csrf
-          <button class="rounded-lg bg-slate-900 text-white px-3 py-1.5 hover:bg-slate-800">Logout</button>
+          <button class="rounded-lg bg-slate-900 text-white px-3 py-1.5 hover:bg-slate-800">ออกจากระบบ</button>
         </form>
       </div>
     </div>
@@ -59,25 +59,72 @@
                 <td class="px-4 py-3 border-b">
                   #{{ $o->order_id ?? $o->id }} - {{ \Illuminate\Support\Carbon::parse($o->order_date ?? $o->created_at)->format('d/m/Y H:i') }}
                 </td>
-                <td class="px-4 py-3 border-b">
-                  <div class="text-sm font-medium text-slate-700">{{ $o->shipping_name ?? '—' }} • {{ $o->shipping_phone ?? '—' }}</div>
-                  <div class="text-xs text-slate-500">{{ \Illuminate\Support\Str::limit($o->shipping_address ?? '—', 90) }}</div>
+                <td class="px-4 py-3 border-b align-top">
+                  <div class="flex flex-col leading-tight">
+                    {{-- ชื่อผู้รับ --}}
+                    <div class="text-sm font-semibold text-slate-800 flex items-center gap-1">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A10.97 10.97 0 0112 15c2.28 0 4.374.72 6.121 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      {{ $o->shipping_name ?? '—' }}
+                    </div>
+
+                    {{-- เบอร์โทร --}}
+                    <div class="text-xs text-slate-600 flex items-center gap-1 mt-0.5">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-.59 1.41l-1.41 1.41a16 16 0 007.07 7.07l1.41-1.41A2 2 0 0115 17h2a2 2 0 012 2v2a2 2 0 01-2 2h-2C9.373 23 1 14.627 1 5V3a2 2 0 012-2z" />
+                      </svg>
+                      {{ $o->shipping_phone ?? '—' }}
+                    </div>
+
+                    {{-- ที่อยู่ --}}
+                    <div class="text-xs text-slate-500 mt-1">
+                      {{ \Illuminate\Support\Str::limit($o->shipping_address ?? '—', 90) }}
+                    </div>
+                  </div>
                 </td>
                 <td class="px-4 py-3 border-b text-right font-semibold">
                   ฿{{ number_format((float)($o->total_amount ?? 0), 2) }}
                 </td>
                 <td class="px-4 py-3 border-b text-center">
                   @php
-                    $map = $statusMap[$o->status] ?? $o->status;
-                    $cls = match($o->status) {
-                      'paid','completed'   => 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                      'processing','shipped' => 'bg-sky-50 text-sky-700 border-sky-200',
-                      'cancelled'          => 'bg-rose-50 text-rose-700 border-rose-200',
-                      default              => 'bg-amber-50 text-amber-700 border-amber-200',
-                    };
+                    $status = $o->status ?? 'pending';
+
+                    switch ($status) {
+                      case 'paid':
+                      case 'completed':
+                        $badge = 'bg-emerald-500/10 text-emerald-700 border border-emerald-300';
+                        $icon  = '';
+                        $label = 'ชำระแล้ว';
+                        break;
+
+                      case 'processing':
+                      case 'shipped':
+                        $badge = 'bg-sky-500/10 text-sky-700 border border-sky-300';
+                        $icon  = '';
+                        $label = 'กำลังจัดส่ง';
+                        break;
+
+                      case 'cancelled':
+                        $badge = 'bg-rose-500/10 text-rose-700 border border-rose-300';
+                        $icon  = '';
+                        $label = 'ยกเลิกแล้ว';
+                        break;
+
+                      default:
+                        $badge = 'bg-amber-500/10 text-amber-700 border border-amber-300 animate-pulse';
+                        $icon  = '';
+                        $label = 'รอดำเนินการ';
+                        break;
+                    }
                   @endphp
-                  <span class="text-[11px] px-2 py-0.5 rounded-full border {{ $cls }}">{{ $map }}</span>
+
+                  <span class="inline-flex items-center justify-center gap-1 text-xs font-semibold
+                              px-3 py-1.5 rounded-full whitespace-nowrap {{ $badge }}">
+                    {{ $icon }} {{ $label }}
+                  </span>
                 </td>
+
                 <td class="px-4 py-3 border-b text-center">
                   <button type="button"
                           class="rounded-lg border px-3 py-1.5 text-sm hover:bg-slate-50"

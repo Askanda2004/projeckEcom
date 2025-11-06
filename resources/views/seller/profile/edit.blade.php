@@ -36,13 +36,15 @@
           <path stroke-width="2" d="M4 7h16M4 12h16M4 17h16"/>
         </svg>
       </div>
-      <span class="font-bold">Seller</span>
+      <span class="font-bold">ร้านค้า</span>
       <span class="hidden md:inline text-slate-400">/</span>
-      <span class="hidden md:inline text-slate-500">Store Profile</span>
+      <span class="hidden md:inline text-slate-500">โปรไฟล์ร้าน</span>
     </div>
     <div class="flex items-center gap-2">
       <form method="POST" action="{{ route('logout') }}"> @csrf
-        <button class="px-3 py-1.5 text-sm rounded-lg bg-slate-900 text-white hover:bg-slate-800">ออกจากระบบ</button>
+        <button class="px-3 py-1.5 text-sm rounded-lg border border-neutral-300 text-ink hover:bg-neutral-100 transition-colors">
+            ออกจากระบบ
+          </button>
       </form>
     </div>
   </div>

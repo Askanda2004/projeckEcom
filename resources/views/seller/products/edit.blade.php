@@ -30,7 +30,7 @@
         <div class="w-9 h-9 rounded-xl bg-olive/10 grid place-items-center">
           <svg class="w-5 h-5 text-olive" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="2" d="M4 7h16M4 12h16M4 17h16"/></svg>
         </div>
-        <span class="font-semibold">Seller • Edit Product</span>
+        <span class="font-semibold">ร้านค้า • แก้ไขสินค้า</span>
       </div>
       <a href="{{ route('seller.products.index') }}" class="text-sm text-slate-600 hover:text-slate-900">Back to list</a>
     </div>
@@ -220,7 +220,7 @@
             </div>
 
             <div class="md:col-span-2">
-              <label class="block text-sm font-medium">แบรนด์สินค้าชื่อ</label>
+              <label class="block text-sm font-medium">ยี่ห้อ / แบรณด์</label>
               <textarea name="description" rows="2"
                         class="mt-1 w-full rounded-xl border border-slate-200 bg-white/70 focus:bg-white px-3 py-2 outline-none focus:ring-2 focus:ring-olive/30">{{ old('description', $product->description) }}</textarea>
             </div>

@@ -34,13 +34,15 @@
             <path stroke-width="2" d="M4 7h16M4 12h16M4 17h16"/>
           </svg>
         </div>
-        <span class="font-semibold">Seller</span>
+        <span class="font-semibold">ร้านค้า</span>
         <span class="hidden md:inline text-slate-400">/</span>
-        <span class="hidden md:inline text-slate-500">Order Management</span>
+        <span class="hidden md:inline text-slate-500">การจัดการคำสั่งซื้อ</span>
       </div>
       <div class="flex items-center gap-2">
         <form method="POST" action="{{ route('logout') }}"> @csrf
-          <button class="px-3 py-1.5 text-sm rounded-lg bg-ink text-white hover:bg-slate-900">Logout</button>
+          <button class="px-3 py-1.5 text-sm rounded-lg border border-neutral-300 text-ink hover:bg-neutral-100 transition-colors">
+            ออกจากระบบ
+          </button>
         </form>
       </div>
     </div>
@@ -160,7 +162,7 @@
               <button
                 class="absolute right-1 top-1/2 -translate-y-1/2 h-9 px-4 rounded-full
                       bg-primary text-white text-sm hover:bg-blue-700">
-                Search
+                ค้นหา
               </button>
             </form>
           </div>
@@ -192,7 +194,7 @@
                   @endforeach
                 </select>
                 <button class="h-11 rounded-lg bg-slate-900 text-white px-4 text-sm hover:bg-slate-800">
-                  Apply
+                  ตกลง
                 </button>
               </div>
             </form>
@@ -206,31 +208,84 @@
 
       <div class="bg-white rounded-2xl shadow-soft overflow-hidden">
         <div class="overflow-x-auto">
-          <table class="min-w-full text-sm">
+          {{-- ใช้ table-fixed เพื่อควบคุมความกว้างของคอลัมน์ให้คงที่ --}}
+          <table class="min-w-full text-sm table-fixed">
             <thead class="bg-slate-50 text-slate-600">
               <tr>
-                <th class="px-4 py-3 text-left font-semibold border-b">วันที่สั่งซื้อ</th>
-                <th class="px-4 py-3 text-left font-semibold border-b">ชื่อผู้รับ</th>
-                <th class="px-4 py-3 text-left font-semibold border-b">เบอร์โทร</th>
+                <th class="px-4 py-3 text-left font-semibold border-b w-[150px]">วันที่สั่งซื้อ</th>
+                <th class="px-4 py-3 text-left font-semibold border-b w-[160px]">ชื่อผู้รับ</th>
+                <th class="px-4 py-3 text-left font-semibold border-b w-[140px]">เบอร์โทร</th>
                 <th class="px-4 py-3 text-left font-semibold border-b">ที่อยู่จัดส่ง</th>
-                <th class="px-4 py-3 text-right font-semibold border-b">ยอดรวม</th>
-                <th class="px-4 py-3 text-center font-semibold border-b">สถานะคำสั่งซื้อ</th>
-                <th class="px-4 py-3 text-center font-semibold border-b">รายละเอียด</th>
+                <th class="px-4 py-3 text-right font-semibold border-b w-[130px]">ยอดรวม</th>
+                <th class="px-4 py-3 text-center font-semibold border-b w-[156px]">ชำระเงิน</th>
+                <th class="px-4 py-3 text-center font-semibold border-b w-[160px]">สถานะคำสั่งซื้อ</th>
+                <th class="px-4 py-3 text-center font-semibold border-b w-[120px]">รายละเอียด</th>
               </tr>
             </thead>
+
             <tbody>
               @forelse ($orders as $o)
                 <tr class="hover:bg-slate-50">
+                  {{-- วันที่สั่ง --}}
                   <td class="px-4 py-3 border-b">
                     {{ \Illuminate\Support\Carbon::parse($o->order_date)->timezone('Asia/Bangkok')->format('d/m/Y H:i') }}
                   </td>
-                  <td class="px-4 py-3 border-b font-medium">{{ $o->shipping_name ?? '—' }}</td>
-                  <td class="px-4 py-3 border-b">{{ $o->shipping_phone ?? '—' }}</td>
-                  <td class="px-4 py-3 border-b">
-                    <span title="{{ $o->shipping_address }}">{{ \Illuminate\Support\Str::limit($o->shipping_address, 80) ?: '—' }}</span>
-                  </td>
-                  <td class="px-4 py-3 border-b text-right font-semibold">฿{{ number_format((float) $o->total_amount, 2) }}</td>
 
+                  {{-- ชื่อผู้รับ --}}
+                  <td class="px-4 py-3 border-b font-medium">{{ $o->shipping_name ?? '—' }}</td>
+
+                  {{-- เบอร์โทร --}}
+                  <td class="px-4 py-3 border-b">{{ $o->shipping_phone ?? '—' }}</td>
+
+                  {{-- ที่อยู่ --}}
+                  <td class="px-4 py-3 border-b">
+                    <span title="{{ $o->shipping_address }}">
+                      {{ \Illuminate\Support\Str::limit($o->shipping_address, 80) ?: '—' }}
+                    </span>
+                  </td>
+
+                  {{-- ยอดรวม --}}
+                  <td class="px-4 py-3 border-b text-right font-semibold">
+                    ฿{{ number_format((float)$o->total_amount, 2) }}
+                  </td>
+
+                  {{-- ✅ ชำระเงิน --}}
+                  <td class="px-4 py-3 border-b text-center">
+                    @php
+                      $status = $o->payment_status ?? 'unpaid';
+                      switch ($status) {
+                        case 'verified':
+                          $badge = 'bg-emerald-500/10 text-emerald-700 ring-1 ring-emerald-400';
+                          $icon  = '';
+                          $text  = 'ชำระแล้ว';
+                          break;
+                        case 'pending':
+                          $badge = 'bg-amber-500/10 text-amber-700 ring-1 ring-amber-400 animate-pulse';
+                          $icon  = '';
+                          $text  = 'รอตรวจสอบ';
+                          break;
+                        case 'rejected':
+                          $badge = 'bg-rose-500/10 text-rose-700 ring-1 ring-rose-400';
+                          $icon  = '';
+                          $text  = 'ปฏิเสธ';
+                          break;
+                        default:
+                          $badge = 'bg-slate-200 text-slate-700 ring-1 ring-slate-300';
+                          $icon  = '';
+                          $text  = 'ยังไม่ชำระ';
+                          break;
+                      }
+                    @endphp
+
+                    <span
+                      class="inline-flex items-center justify-center gap-1
+                            text-sm font-semibold px-3 py-1.5 rounded-full
+                            whitespace-nowrap min-w-[128px] {{ $badge }}">
+                      {{ $icon }} {{ $text }}
+                    </span>
+                  </td>
+
+                  {{-- สถานะคำสั่งซื้อ --}}
                   <td class="px-4 py-3 border-b text-center">
                     <form method="POST" action="{{ route('seller.orders.status', $o) }}">
                       @csrf @method('PATCH')
@@ -244,6 +299,7 @@
                     </form>
                   </td>
 
+                  {{-- รายละเอียด --}}
                   <td class="px-4 py-3 border-b text-center">
                     <button type="button"
                             class="rounded-lg border px-3 py-1.5 text-sm hover:bg-slate-50"
@@ -251,15 +307,16 @@
                       รายละเอียด
                     </button>
 
-                    <!-- Modal -->
+                    {{-- โมดัลแสดงรายละเอียดคำสั่งซื้อ --}}
                     <dialog id="dlg-{{ $o->order_id }}" class="rounded-2xl p-0 w-full max-w-2xl">
                       <form method="dialog">
                         <div class="p-4 sm:p-6 border-b">
                           <div class="flex items-center justify-between gap-3">
                             <h3 class="font-semibold">
-                              รายละเอียดคำสั่งซื้อ 
+                              รายละเอียดคำสั่งซื้อ
                               <span class="ml-2 text-sm text-slate-500">
-                                #{{ $o->order_id ?? $o->id }} - ({{ \Illuminate\Support\Carbon::parse($o->order_date)->timezone('Asia/Bangkok')->format('d/m/Y H:i') }})
+                                #{{ $o->order_id ?? $o->id }} -
+                                ({{ \Illuminate\Support\Carbon::parse($o->order_date)->timezone('Asia/Bangkok')->format('d/m/Y H:i') }})
                               </span>
                             </h3>
                             <button class="rounded-lg border px-3 py-1.5 text-sm hover:bg-slate-50">ปิด</button>
@@ -268,8 +325,15 @@
                             ชื่อผู้รับ: {{ $o->shipping_name ?? '—' }} • {{ $o->shipping_phone ?? '—' }}<br>
                             ที่อยู่: {{ $o->shipping_address ?? '—' }}
                           </div>
+
+                          {{-- แสดงสถานะชำระเงินในโมดัล --}}
+                          <div class="mt-3 text-sm">
+                            <span class="mr-2 text-slate-500">ชำระเงิน:</span>
+                            <span class="text-xs px-2 py-0.5 rounded-full {{ $badge }}">{{ $text }}</span>
+                          </div>
                         </div>
 
+                        {{-- ตารางสินค้าในคำสั่งซื้อ --}}
                         <div class="p-4 sm:p-6 overflow-x-auto">
                           <table class="min-w-full text-sm">
                             <thead class="bg-slate-50">
@@ -326,14 +390,16 @@
                 </tr>
               @empty
                 <tr>
-                  <td colspan="7" class="px-4 py-8 text-center text-slate-500">No orders found.</td>
+                  <td colspan="8" class="px-4 py-8 text-center text-slate-500">
+                    ไม่พบคำสั่งซื้อ
+                  </td>
                 </tr>
               @endforelse
             </tbody>
           </table>
         </div>
 
-        <!-- Pagination -->
+        {{-- Pagination --}}
         <div class="p-4 sm:p-6 border-t border-slate-100">
           <div class="flex items-center justify-between">
             <div class="text-xs text-slate-500">
@@ -349,18 +415,18 @@
   </div>
 
   <!-- Toggle submenu -->
-  <script>
-    (function(){
-      const btn = document.querySelector('[data-toggle="submenu-products"]');
-      const menu = document.getElementById('submenu-products');
-      const caret = btn?.querySelector('[data-caret]');
-      function setOpen(open){
-        menu.classList.toggle('hidden', !open);
-        btn?.setAttribute('aria-expanded', open ? 'true' : 'false');
-        if (caret) caret.style.transform = open ? 'rotate(90deg)' : 'rotate(0deg)';
-      }
-      btn?.addEventListener('click', () => setOpen(menu.classList.contains('hidden')));
-    })();
-  </script>
-</body>
+    <script>
+      (function(){
+        const btn = document.querySelector('[data-toggle="submenu-products"]');
+        const menu = document.getElementById('submenu-products');
+        const caret = btn?.querySelector('[data-caret]');
+        function setOpen(open){
+          menu.classList.toggle('hidden', !open);
+          btn?.setAttribute('aria-expanded', open ? 'true' : 'false');
+          if (caret) caret.style.transform = open ? 'rotate(90deg)' : 'rotate(0deg)';
+        }
+        btn?.addEventListener('click', () => setOpen(menu.classList.contains('hidden')));
+      })();
+    </script>
+  </body>
 </html>

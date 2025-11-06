@@ -32,7 +32,14 @@
             <path stroke-width="2" d="M4 7h16M4 12h16M4 17h16"/>
           </svg>
         </div>
-        <span class="font-semibold">Seller • หมวดหมู่สินค้า</span>
+        <span class="font-semibold"> • หน้าหมวดหมู่สินค้า</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <form method="POST" action="{{ route('logout') }}"> @csrf
+          <button class="px-3 py-1.5 text-sm rounded-lg border border-neutral-300 text-ink hover:bg-neutral-100 transition-colors">
+            ออกจากระบบ
+          </button>
+        </form>
       </div>
       {{-- <a href="{{ route('seller.products.index') }}" class="text-sm text-slate-600 hover:text-slate-900">กลับไปจัดการสินค้า</a> --}}
     </div>

@@ -62,20 +62,22 @@ class CheckoutController extends Controller
      */
     public function store(Request $request)
     {
-        // ✅ ตรวจฟอร์ม + ไฟล์สลิป
+        // 1) Validate ฟอร์ม + สลิป
         $data = $request->validate([
             'shipping_name'    => ['required','string','max:255'],
-            'shipping_phone'   => ['required','string','digits:10'],
+            // เบอร์ไทย 10 หลัก เริ่มด้วย 0
+            'shipping_phone'   => ['required','regex:/^0\d{9}$/'],
             'shipping_address' => ['required','string','max:2000'],
-            'payment_slip'     => ['nullable','image','max:2048'], // สลิปโอนเงิน
+            'payment_slip'     => ['nullable','image','mimes:jpg,jpeg,png,webp','max:4096'],
             'confirm'          => ['required','accepted'],
         ], [
-            'confirm.accepted' => 'กรุณาติ๊กยืนยันการสั่งซื้อ',
+            'shipping_phone.regex' => 'กรุณากรอกเบอร์โทรให้ถูกต้อง (10 หลัก เริ่มด้วย 0)',
+            'confirm.accepted'     => 'กรุณาติ๊กยืนยันการสั่งซื้อ',
         ]);
 
         $userId = auth()->id();
 
-        // ดึงข้อมูลตะกร้า
+        // 2) โหลดตะกร้าจาก DB
         $items = DB::table('carts')
             ->join('cart_items', 'cart_items.cart_id', '=', 'carts.cart_id')
             ->join('products', 'products.product_id', '=', 'cart_items.product_id')
@@ -83,7 +85,7 @@ class CheckoutController extends Controller
             ->select([
                 'cart_items.product_id',
                 'cart_items.quantity',
-                'cart_items.price',
+                'cart_items.price',              // snapshot ราคา
                 'products.name as product_name',
                 'products.seller_id',
                 'products.stock_quantity',
@@ -94,76 +96,94 @@ class CheckoutController extends Controller
             return redirect()->route('customer.cart')->with('error', 'ตะกร้าว่าง');
         }
 
-        // ตรวจ seller_id ของสินค้าทั้งหมด
+        // 3) สินค้าทุกชิ้นต้องมี seller_id
         foreach ($items as $row) {
-            if (!$row->seller_id) {
+            if (empty($row->seller_id)) {
                 return back()->with('error', "สินค้า \"{$row->product_name}\" ยังไม่ผูกกับผู้ขาย (seller_id)");
             }
         }
 
-        // กลุ่มสินค้าแยกตาม seller_id
-        $bySeller = $items->groupBy('seller_id');
-
-        // ✅ ถ้ามีอัปโหลดสลิป เก็บลง storage/public/payment_slips
+        // 4) อัปโหลดสลิป 1 ไฟล์ (ถ้ามี) แล้วใช้ path เดียวกับทุกออเดอร์
         $slipPath = null;
         if ($request->hasFile('payment_slip')) {
             $slipPath = $request->file('payment_slip')->store('payment_slips', 'public');
         }
+        $hasSlip = (bool) $slipPath;
 
-        DB::transaction(function () use ($bySeller, $data, $userId, $slipPath) {
+        // 5) แยกสินค้าตามผู้ขาย
+        $bySeller = $items->groupBy('seller_id');
+
+        // 6) ทำทุกอย่างในทรานแซกชัน
+        DB::transaction(function () use ($bySeller, $data, $userId, $slipPath, $hasSlip) {
+
             foreach ($bySeller as $sellerId => $group) {
-                // ล็อกสินค้าไว้กัน race condition
-                $productIds = $group->pluck('product_id')->all();
-                $lockProducts = Product::whereIn('product_id', $productIds)
+
+                // 6.1) ล็อกสต็อกกันแข่งกันตัด
+                $productIds   = $group->pluck('product_id')->all();
+                $lockProducts = \App\Models\Product::whereIn('product_id', $productIds)
                     ->lockForUpdate()
                     ->get()
                     ->keyBy('product_id');
 
-                // ตรวจสต็อก
+                // 6.2) ตรวจสต็อกพอไหม
                 foreach ($group as $row) {
                     $p = $lockProducts[$row->product_id] ?? null;
-                    if (!$p || $p->stock_quantity < $row->quantity) {
+                    if (!$p) {
                         throw \Illuminate\Validation\ValidationException::withMessages([
-                            'cart' => "สินค้า {$row->product_name} สต็อกไม่เพียงพอ",
+                            'cart' => "ไม่พบสินค้า (ID: {$row->product_id})",
+                        ]);
+                    }
+                    if ((int)$p->stock_quantity < (int)$row->quantity) {
+                        throw \Illuminate\Validation\ValidationException::withMessages([
+                            'cart' => "สินค้า {$row->product_name} สต็อกไม่เพียงพอ (คงเหลือ {$p->stock_quantity})",
                         ]);
                     }
                 }
 
-                // รวมยอดแต่ละ seller
-                $total = $group->sum(fn($r) => $r->price * $r->quantity);
+                // 6.3) ยอดรวมของร้านนี้
+                $total = $group->sum(fn($r) => (float)$r->price * (int)$r->quantity);
 
-                // ✅ สร้าง order
-                $order = Order::create([
-                    'user_id'          => $userId,
-                    'seller_id'        => $sellerId,
+                // 6.4) สร้างคำสั่งซื้อ (สลิปเดียว แชร์ทุกออเดอร์)
+                $order = \App\Models\Order::create([
+                    'user_id'          => (int)$userId,
+                    'seller_id'        => (int)$sellerId,
                     'order_date'       => now('Asia/Bangkok'),
-                    'status'           => 'pending',           // ยังไม่ตรวจสอบ
-                    'payment_status'   => 'pending',           // รอการตรวจสอบ
-                    'payment_slip'     => $slipPath,           // เก็บ path สลิป
-                    'total_amount'     => $total,
+                    'status'           => 'pending',
+                    'payment_status'   => $hasSlip ? 'pending' : 'unpaid',
+                    'payment_slip'     => $slipPath,      // อาจเป็น null ถ้าไม่ได้แนบ
+                    'total_amount'     => (float)$total,
                     'shipping_name'    => $data['shipping_name'],
                     'shipping_phone'   => $data['shipping_phone'],
                     'shipping_address' => $data['shipping_address'],
                 ]);
 
-                // ✅ สร้าง order_items
+                // 6.5) ไอเท็ม + ตัดสต็อกแบบกันติดลบ
                 foreach ($group as $row) {
-                    OrderItem::create([
-                        'order_id'   => $order->order_id,
-                        'product_id' => $row->product_id,
+                    \App\Models\OrderItem::create([
+                        'order_id'   => (int)$order->order_id,
+                        'product_id' => (int)$row->product_id,
                         'name'       => $row->product_name,
-                        'quantity'   => $row->quantity,
-                        'price'      => $row->price,
-                        'seller_id'  => $sellerId,
+                        'quantity'   => (int)$row->quantity,
+                        'price'      => (float)$row->price,
+                        // ถ้ามีคอลัมน์ seller_id ใน order_items ให้เก็บด้วย
+                        'seller_id'  => (int)$sellerId,
                     ]);
 
-                    // ตัดสต็อก
-                    Product::where('product_id', $row->product_id)
+                    // decrement แบบกันติดลบ
+                    $affected = \App\Models\Product::where('product_id', (int)$row->product_id)
+                        ->where('stock_quantity', '>=', (int)$row->quantity)
                         ->decrement('stock_quantity', (int)$row->quantity);
+
+                    if ($affected === 0) {
+                        // กันกรณีแข่งกันตัดจนไม่พอในจังหวะนี้
+                        throw \Illuminate\Validation\ValidationException::withMessages([
+                            'cart' => "ตัดสต็อกไม่สำเร็จสำหรับสินค้า ID {$row->product_id}",
+                        ]);
+                    }
                 }
             }
 
-            // ✅ ล้างตะกร้าเมื่อสั่งซื้อเสร็จ
+            // 6.6) ล้างตะกร้าหลังสั่งซื้อสำเร็จ
             DB::table('cart_items')
                 ->whereIn('cart_id', function ($q) use ($userId) {
                     $q->select('cart_id')->from('carts')->where('user_id', $userId);
@@ -173,6 +193,8 @@ class CheckoutController extends Controller
 
         return redirect()
             ->route('customer.orders.index')
-            ->with('status', 'สั่งซื้อสำเร็จ! โปรดรอเจ้าหน้าที่ตรวจสอบการชำระเงิน');
+            ->with('status', $hasSlip
+                ? 'สั่งซื้อสำเร็จและส่งสลิปเรียบร้อยแล้ว • รอแอดมินตรวจสอบ'
+                : 'สั่งซื้อสำเร็จ • คุณสามารถอัปโหลดสลิปชำระเงินภายหลังได้');
     }
 }

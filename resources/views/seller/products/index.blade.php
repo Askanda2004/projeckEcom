@@ -34,13 +34,15 @@
             <path stroke-width="2" d="M4 7h16M4 12h16M4 17h16"/>
           </svg>
         </div>
-        <span class="font-semibold">ผู้ขาย</span>
+        <span class="font-semibold">ร้านค้า</span>
         <span class="hidden md:inline text-slate-400">/</span>
         <span class="hidden md:inline text-slate-600">การจัดการสินค้า</span>
       </div>
       <div class="flex items-center gap-2">
         <form method="POST" action="{{ route('logout') }}"> @csrf
-          <button class="px-3 h-9 rounded-xl bg-ink text-white hover:opacity-90">ออกจากระบบ</button>
+          <button class="px-3 py-1.5 text-sm rounded-lg border border-neutral-300 text-ink hover:bg-neutral-100 transition-colors">
+            ออกจากระบบ
+          </button>
         </form>
       </div>
     </div>
@@ -218,7 +220,7 @@
 
                   <td class="px-4 py-3 border-b">
                     <a href="{{ route('seller.products.edit', $p) }}"
-                       class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50">Edit</a>
+                       class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50">แก้ไข</a>
                   </td>
 
                   <td class="px-4 py-3 border-b">
@@ -226,7 +228,7 @@
                           onsubmit="return confirm('Delete this product?')">
                       @csrf
                       @method('DELETE')
-                      <button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-rose-200 text-rose-700 hover:bg-rose-50">Delete</button>
+                      <button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-rose-200 text-rose-700 hover:bg-rose-50">ลบ</button>
                     </form>
                   </td>
                 </tr>

@@ -3,25 +3,25 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Order;
+use Illuminate\Http\Request;
 
 class PaymentReviewController extends Controller
 {
-    // รายการคำสั่งซื้อที่มีสลิป รอสถานะตรวจสอบ/จ่ายแล้ว
     public function index(Request $request)
     {
-        $q = trim((string)$request->get('q',''));
+        $q = (string) $request->query('q','');
 
         $orders = Order::query()
-            ->with(['items']) // ต้องมีสัมพันธ์ items ในโมเดล Order
             ->when($q !== '', function($s) use ($q) {
-                $s->where('shipping_name','like',"%{$q}%")
-                  ->orWhere('shipping_phone','like',"%{$q}%");
+                $s->where(function($w) use ($q) {
+                    $w->where('shipping_name','like',"%{$q}%")
+                      ->orWhere('shipping_phone','like',"%{$q}%");
+                });
             })
-            ->whereNotNull('payment_slip')  // มีสลิปเท่านั้น
-            ->orderByDesc('order_id')
-            ->paginate(15)
+            ->whereNotNull('payment_slip') // มีสลิปเท่านั้น
+            ->latest('order_id')
+            ->paginate(10)
             ->withQueryString();
 
         return view('admin.payments.index', compact('orders','q'));
@@ -29,25 +29,27 @@ class PaymentReviewController extends Controller
 
     public function show(Order $order)
     {
-        $order->load(['items']); // แสดงรายละเอียดรายการ
+        $order->load(['items.product','user']);
         return view('admin.payments.show', compact('order'));
     }
 
-    public function approve(Order $order)
+    public function update(Request $request, Order $order)
     {
-        // อนุมัติ => เปลี่ยนเป็น paid
-        $order->update(['status' => 'paid']);
+        $data = $request->validate([
+            'action' => ['required','in:verify,reject'],
+        ]);
 
-        // TODO: หากต้องการแจ้งเตือน seller/ลูกค้า สามารถยิง event/notification ที่นี่
-        // เช่น dispatch(new NotifySellersPaid($order));
+        if ($data['action'] === 'verify') {
+            $order->payment_status     = 'verified';
+            $order->payment_verified_by= auth()->id();
+            $order->payment_verified_at= now();
+        } else {
+            $order->payment_status     = 'rejected';
+            $order->payment_verified_by= auth()->id();
+            $order->payment_verified_at= now();
+        }
+        $order->save();
 
-        return back()->with('status','ยืนยันการชำระเงินแล้ว (paid)');
-    }
-
-    public function reject(Order $order)
-    {
-        // ไม่ผ่าน => กลับเป็น pending และลบสลิป (หรือเก็บไว้ก็ได้)
-        $order->update(['status' => 'pending']);
-        return back()->with('status','ปฏิเสธการชำระเงินแล้ว (กลับไป pending)');
+        return redirect()->route('admin.payments.index')->with('status','อัปเดตสถานะการชำระเงินเรียบร้อย');
     }
 }

@@ -33,10 +33,12 @@
             <path stroke-width="2" d="M4 7h16M4 12h16M4 17h16"/>
           </svg>
         </div>
-        <span class="font-semibold">Seller • Add Product</span>
+        <span class="font-semibold"> • หน้าเพิ่มสินค้า</span>
       </div>
       <form method="POST" action="{{ route('logout') }}"> @csrf
-        <button class="px-3 h-9 rounded-xl bg-ink text-white hover:opacity-90">ออกจากระบบ</button>
+        <button class="px-3 py-1.5 text-sm rounded-lg border border-neutral-300 text-ink hover:bg-neutral-100 transition-colors">
+            ออกจากระบบ
+          </button>
       </form>
     </div>
   </header>
@@ -173,7 +175,6 @@
               <select name="size"
                       class="mt-1 w-full h-11 rounded-xl border border-slate-200 bg-white/70 focus:bg-white px-3 outline-none focus:ring-2 focus:ring-olive/30">
                 <option value="">— เลือกขนาด —</option>
-                <option value="-"  @selected(old('size') == '-')>-</option>
                 <option value="S"  @selected(old('size') == 'S')>S</option>
                 <option value="M"  @selected(old('size') == 'M')>M</option>
                 <option value="L"  @selected(old('size') == 'L')>L</option>
@@ -216,7 +217,7 @@
             </div>
 
             <div class="md:col-span-2">
-              <label class="block text-sm font-medium">แบรนด์สินค้าชื่อ</label>
+              <label class="block text-sm font-medium">ยี่ห้อ / แบรณด์</label>
               <textarea name="description" rows="2"
                         class="mt-1 w-full rounded-xl border border-slate-200 bg-white/70 focus:bg-white px-3 py-2 outline-none focus:ring-2 focus:ring-olive/30">{{ old('description') }}</textarea>
             </div>

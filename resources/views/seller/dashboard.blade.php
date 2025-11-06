@@ -1,46 +1,58 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
+<html lang="th"> <head>
   <meta charset="UTF-8" />
   <title>Seller • Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
+    // --- 3. เปลี่ยน Design System เป็น (Olive/Sand/Ink) ---
     tailwind.config = {
       theme: {
         extend: {
-          colors: { primary: { DEFAULT: '#2563eb' } }, // blue-600
-          boxShadow: { soft: '0 8px 30px rgba(0,0,0,0.08)' }
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'], // 4. ใช้ 'Inter' เป็นฟอนต์หลัก
+          },
+          colors: { 
+            primary: { DEFAULT: '#7C8B6A' }, // 5. เปลี่ยนสีหลักเป็น 'Olive'
+            sand: '#FAFAF7',                 // 6. พื้นหลังสีขาวนวล
+            ink: '#111827',                  // 7. ตัวหนังสือสีเทาเข้ม
+            olive: '#7C8B6A'
+          },
+          boxShadow: { 
+            soft:'0 6px 24px rgba(0,0,0,0.06)' // 8. เงาที่นุ่มนวล
+          }
         }
       }
     }
   </script>
 </head>
-<body class="bg-slate-50 text-slate-800">
+<body class="bg-sand text-ink antialiased font-sans">
 
-  <!-- Header -->
-  <header class="sticky top-0 z-30 bg-white/90 backdrop-blur shadow-soft">
+  <header class="sticky top-0 z-30 bg-white/90 backdrop-blur-sm border-b border-neutral-200">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       <div class="flex items-center gap-3">
         <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="2" d="M4 7h16M4 12h16M4 17h16"/></svg>
         </div>
-        <span class="font-bold">ผู้ขาย</span>
+        <span class="font-semibold">ร้านค้า</span>
       </div>
       <div class="flex items-center gap-2">
-        {{-- <a href="{{ route('dashboard') }}" class="text-sm text-slate-600 hover:text-slate-900">Home</a> --}}
         <form method="POST" action="{{ route('logout') }}">
           @csrf
-          <button class="px-3 py-1.5 text-sm rounded-lg bg-slate-900 text-white hover:bg-slate-800">ออกจากระบบ</button>
+          <button class="px-3 py-1.5 text-sm rounded-lg border border-neutral-300 text-ink hover:bg-neutral-100 transition-colors">
+            ออกจากระบบ
+          </button>
         </form>
       </div>
     </div>
   </header>
 
-  <!-- Layout -->
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-12 gap-6">
-    <!-- Sidebar -->
     <aside class="col-span-12 md:col-span-3">
       <div class="bg-white rounded-2xl shadow-soft p-4 md:p-5">
         @php
@@ -49,37 +61,45 @@
             $shop = $sp->shop_name ?? 'ตั้งชื่อร้านของคุณ';
           @endphp
 
-          <div class="flex items-center gap-3 mb-4 p-3 rounded-xl border border-slate-200 bg-slate-50">
+          <div class="flex items-center gap-3 mb-4 p-3 rounded-xl border border-neutral-200 bg-neutral-50">
             @if($logo)
               <img src="{{ $logo }}" class="w-10 h-10 rounded-full object-cover border" alt="logo">
             @else
-              <div class="w-10 h-10 rounded-full bg-slate-200 grid place-items-center text-slate-500 text-xs border">
+              <div class="w-10 h-10 rounded-full bg-neutral-200 grid place-items-center text-neutral-500 text-xs border">
                 LOGO
               </div>
             @endif
             <div class="min-w-0">
               <div class="font-semibold truncate">{{ $shop }}</div>
-              {{-- <div class="text-xs text-slate-500 truncate">{{ auth()->user()->name }}</div> --}}
             </div>
           </div>
           
-        <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-3">Menu</h3>
+        <h3 class="text-sm font-semibold text-neutral-500 uppercase tracking-wide mb-3">Menu</h3>
+        
+        @php
+          $linkBase  = 'flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-neutral-100 transition-colors';
+          $activeCls = 'bg-neutral-100 text-ink font-medium';
+          
+          $activeReports  = request()->routeIs('seller.reports.*');
+          $activeProducts = request()->routeIs('seller.products.*');
+          $activeOrders   = request()->routeIs('seller.orders.*');
+          $activeProfile  = request()->routeIs('seller.profile.*');
+        @endphp
+
         <nav class="space-y-1">
-          <a href="{{ route('seller.reports.index') }}" class="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-100 text-slate-900">
+          <a href="{{ route('seller.reports.index') }}" class="{{ $linkBase }} {{ $activeReports ? $activeCls : '' }}">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
             การวิเคราะห์และรายงาน
           </a>
-          <a href="{{ route('seller.products.index') }}" class="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-100">
+          <a href="{{ route('seller.products.index') }}" class="{{ $linkBase }} {{ $activeProducts ? $activeCls : '' }}">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M20 6H4v12h16V6zM8 8h8v2H8V8zm0 4h8v2H8v-2z"/></svg>
             การจัดการสินค้า
           </a>
-          <a href="{{ route('seller.orders.index') }}" class="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-100">
+          <a href="{{ route('seller.orders.index') }}" class="{{ $linkBase }} {{ $activeOrders ? $activeCls : '' }}">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M3 7l9-4 9 4-9 4-9-4zm0 6l9 4 9-4m-9 4v6"/></svg>
             การจัดการคำสั่งซื้อ
           </a>
-
-          <a href="{{ route('seller.profile.edit') }}"
-            class="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-slate-100">
+          <a href="{{ route('seller.profile.edit') }}" class="{{ $linkBase }} {{ $activeProfile ? $activeCls : '' }}">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.9-2.2 4.9-4.9S14.7 2.2 12 2.2 7.1 4.4 7.1 7.1 9.3 12 12 12zm0 2.4c-3.3 0-9.6 1.6-9.6 4.9V22h19.2v-2.7c0-3.3-6.3-4.9-9.6-4.9z"/></svg>
             โปรไฟล์ร้านค้า
           </a>
@@ -87,9 +107,7 @@
       </div>
     </aside>
 
-    <!-- Main -->
-    
-  </div>
+    </div>
 
 </body>
 </html>

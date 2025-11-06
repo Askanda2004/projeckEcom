@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\UserManagementController;
+use App\Http\Controllers\Admin\PaymentReviewController;
 
 use App\Http\Controllers\Seller\ProductController as SellerProductController;
 use App\Http\Controllers\Seller\OrderController as SellerOrderController;
@@ -51,6 +52,10 @@ Route::middleware(['auth','verified'])->group(function () {
         Route::get('/payments/{order}', [\App\Http\Controllers\Admin\PaymentController::class, 'show'])->name('payments.show');
         Route::patch('/payments/{order}/verify', [\App\Http\Controllers\Admin\PaymentController::class, 'verify'])->name('payments.verify');
         Route::patch('/payments/{order}/reject', [\App\Http\Controllers\Admin\PaymentController::class, 'reject'])->name('payments.reject');
+
+         Route::get('payments',              [PaymentReviewController::class,'index'])->name('payments.index');
+        Route::get('payments/{order}',      [PaymentReviewController::class,'show'])->name('payments.show');
+        Route::patch('payments/{order}',    [PaymentReviewController::class,'update'])->name('payments.update');
     });
 
     // เฉพาะ Seller

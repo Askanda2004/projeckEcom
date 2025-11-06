@@ -28,26 +28,23 @@
     }
   </script>
 </head>
-<body class="bg-sand text-ink antialiased">
 
-  {{-- ====== (แก้ได้) สินค้าแนะนำเริ่มต้น ถ้า Controller ไม่ส่งมา ====== --}}
+<body class="bg-sand text-ink antialiased">
   @php
-    /** ถ้ามีการส่ง $featuredProducts มาจาก Controller จะใช้ค่านั้นแทน */
     $featuredProducts = $featuredProducts
       ?? [
-        ['name' => 'สินค้าแนะนำ',    'price' => 890, 'image' => 'https://scontent-bkk1-1.xx.fbcdn.net/v/t39.30808-6/543511326_686152997834162_653027445134899577_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=833d8c&_nc_ohc=sfEMIWREZ8cQ7kNvwGJ3aIP&_nc_oc=Adnd98oN98nOyzF6k6DcmfIhsCcno3sqnN7c-9joV3qNPxe2antXFH9yx4N5hGoyNm4&_nc_zt=23&_nc_ht=scontent-bkk1-1.xx&_nc_gid=ZJ4dackIQD-fSU05zofDmQ&oh=00_Afdb61fQlT4EZ2PaAVmf7_Xo2WY5EmRLkNJaf_ZampOwUw&oe=68FA627F'],
-        ['name' => 'สินค้าแนะนำ',    'price' => 159, 'image' => 'https://scontent-bkk1-1.xx.fbcdn.net/v/t39.30808-6/562052870_721281290987999_1659636245073653228_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=f727a1&_nc_ohc=HJE9lImVRyIQ7kNvwFFU9f7&_nc_oc=Adm5oluAjUaXHoJnm51DTJYHggD79fGs2SUJkN21yidsWUr_e_ZLBSdh0Ns7MUbIOic&_nc_zt=23&_nc_ht=scontent-bkk1-1.xx&_nc_gid=10hJoJ_3wYFTSDEzsMFD9Q&oh=00_AffXZlb8oD8D0JTt0fTHxWzJxnG9vj_wmq7cqWLi25435A&oe=68FA7FEB'],
-        ['name' => 'สินค้าแนะนำ',    'price' => 349, 'image' => 'https://scontent-bkk1-2.xx.fbcdn.net/v/t39.30808-6/565177023_721268264322635_2855992648106859369_n.jpg?stp=c0.83.1027.1027a_dst-jpg_s552x414_tt6&_nc_cat=109&ccb=1-7&_nc_sid=92e838&_nc_ohc=C_TeWZJJHsUQ7kNvwHarR-b&_nc_oc=AdkGcj-JvTXlMYDJbhT5W5vQpo7cLEKJyP3X2274oMByOgZ3ZFPxSBkt4TBAGXb5Enc&_nc_zt=23&_nc_ht=scontent-bkk1-2.xx&_nc_gid=wX7vZTNyLV5vDl5opkT9UQ&oh=00_AfdNy11bcPp1Kdus_afzMXz2v92zSMaU97QR1KgMOYTp2w&oe=68FA6D54'],
-        ['name' => 'สินค้าแนะนำ',    'price' => 459, 'image' => 'https://scontent-bkk1-2.xx.fbcdn.net/v/t39.30808-6/557642457_705564482559680_4938703705640271840_n.jpg?stp=dst-jpg_s552x414_tt6&_nc_cat=104&ccb=1-7&_nc_sid=714c7a&_nc_ohc=XlqPtkEJlRcQ7kNvwEdkfll&_nc_oc=Adme93vaIsKxraGrqj5GGQwcofXHyoC1JILBFdrAaoJ4U5QwaLgI9P8aI236su-bZZ4&_nc_zt=23&_nc_ht=scontent-bkk1-2.xx&_nc_gid=clUj7GgKVXiRAkTBYyevSA&oh=00_Afe_zF4V9Mq-qe4WkbdZ8Pjnrw4NWnoFlyS6FP9JQsOKUw&oe=68FA9522'],
+        ['name' => 'สินค้าแนะนำ',    'price' => 890, 'image' => 'https://scontent.fbkk22-4.fna.fbcdn.net/v/t39.30808-6/565177023_721268264322635_2855992648106859369_n.jpg?stp=dst-jpg_p960x960_tt6&_nc_cat=109&ccb=1-7&_nc_sid=f727a1&_nc_ohc=ZvkcRD0Of-oQ7kNvwGoyaoF&_nc_oc=AdkBSgL5vSAdHbLoduQAPaSYvxeRxNB3lfGwzoUFSq9_hSiVY7LY6Ae8KW-k-6XPNoq3WtKRQIIh4lsDooMj3qsB&_nc_zt=23&_nc_ht=scontent.fbkk22-4.fna&_nc_gid=H9hv6rl865rWQqRE6YZ0aQ&oh=00_AfjqVNh4m_4bpfIT1-6B6qJGHeu9bmLciICWjFuSr2ATSw&oe=69109E94'],
+        ['name' => 'สินค้าแนะนำ',    'price' => 159, 'image' => 'https://scontent.fbkk22-2.fna.fbcdn.net/v/t39.30808-6/565703371_720768821039246_6050754381254674923_n.jpg?stp=dst-jpg_p960x960_tt6&_nc_cat=105&ccb=1-7&_nc_sid=127cfc&_nc_ohc=LcYTOhyA42sQ7kNvwG1hlGd&_nc_oc=AdnQNoNPJQN7w_7LLzDT7eLxx_WSckTMGQpLklGGdxNAdTtUfqyM8PH6iPUHgjpcJFRhUa8ihPlg9NjK3ap4Zpw1&_nc_zt=23&_nc_ht=scontent.fbkk22-2.fna&_nc_gid=mlBAOc_qVsYra6ixzfLB5w&oh=00_Afh7MbVCmNFbkVdcDmT9wOZBil-h4OtW1oQg_MmdeV1egg&oe=691071A0'],
+        ['name' => 'สินค้าแนะนำ',    'price' => 349, 'image' => 'https://scontent.fbkk22-1.fna.fbcdn.net/v/t39.30808-6/557417956_706398075809654_6359685745200862717_n.jpg?_nc_cat=100&ccb=1-7&_nc_sid=833d8c&_nc_ohc=dOIrvinw6F4Q7kNvwFjwEdK&_nc_oc=Adk5tzBqSJhN0Uk3oGhnXw_yD4Od_SD09_33geEhLl-48GfedshIAYmF9a2Vfac56sLsyzFI5H7EaJUrWUmnALLo&_nc_zt=23&_nc_ht=scontent.fbkk22-1.fna&_nc_gid=hU7K3RABEv1mbNZk_1F-vw&oh=00_AfiWYdNBFFxAO2d9c4QsWubrScSOUOLL4KjG6k4gvDPxIA&oe=691097B4'],
+        ['name' => 'สินค้าแนะนำ',    'price' => 459, 'image' => 'https://scontent.fbkk22-4.fna.fbcdn.net/v/t39.30808-6/555072281_701499732966155_2182234913646490760_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=127cfc&_nc_ohc=893iy6SsDWIQ7kNvwEjwIrM&_nc_oc=AdmbyISQRk3XqjkiX3EjOK0gjj7Xja3FuA9w-HL1OWXMcwie5FFwcINEZIapzWPwUZOVA-8oSH9si_d0BDJA6zKv&_nc_zt=23&_nc_ht=scontent.fbkk22-4.fna&_nc_gid=ZYIRceT5lfnQny3Gaa5QCg&oh=00_AfimyGW3Ol0EJkfnQ4lwbprCdo4WZ8IE_rofwTv41YbiXw&oe=69108BC0'],
 
-        ['name' => 'สินค้าแนะนำ',    'price' => 199, 'image' => 'https://scontent-bkk1-1.xx.fbcdn.net/v/t39.30808-6/534160880_669630686153060_8974598005241848058_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=833d8c&_nc_ohc=hOoe3V7Ylv0Q7kNvwGASq7Z&_nc_oc=AdldnmrAl_e5vpuKm-yf1Iz2SpBNl1-XiBYOMmaTYARKJtgYbIJgSpS9yQntJ5k5yi8&_nc_zt=23&_nc_ht=scontent-bkk1-1.xx&_nc_gid=cFREKY0PlLwL46bydVJqrA&oh=00_Aff9NRPrzE3tMlnqNRNPI_CJmluEya5bXwj_4SOLh6zwdg&oe=68FA85A4'],
-        ['name' => 'สินค้าแนะนำ',    'price' => 239, 'image' => 'https://scontent-bkk1-1.xx.fbcdn.net/v/t39.30808-6/555628281_701504792965649_1590756232358708746_n.jpg?stp=dst-jpg_s552x414_tt6&_nc_cat=110&ccb=1-7&_nc_sid=714c7a&_nc_ohc=a3u40TTZCZsQ7kNvwFB5j9H&_nc_oc=AdnpxWrQHPvPZfJkCraiFByCCxin9rfK2j08ETxZXBrmCIAU4H-tZBiuVfw-DVr0YJA&_nc_zt=23&_nc_ht=scontent-bkk1-1.xx&_nc_gid=E4jSy0n3qX1U3OJd7PD7tA&oh=00_AfdkN45Yud5WFErnc_F6W9ksKZIg9DDVdk_cJ_sXbrh1wA&oe=68FA9095'],
-        ['name' => 'สินค้าแนะนำ',    'price' => 2499, 'image' => 'https://scontent-bkk1-2.xx.fbcdn.net/v/t39.30808-6/557304104_705558459226949_9018066486250290772_n.jpg?stp=dst-jpg_s552x414_tt6&_nc_cat=102&ccb=1-7&_nc_sid=714c7a&_nc_ohc=ZXfHuSuHUG4Q7kNvwHnHzUD&_nc_oc=Adnof8WhtrNeqwKGFPZjQJeb2Lsa2XlIUBmZFYBp1BhYCUbWYnhlGZWh8H9ZvBhvnIg&_nc_zt=23&_nc_ht=scontent-bkk1-2.xx&_nc_gid=qYUkpzIvSKKB03ztI7JP5Q&oh=00_Aff0hmHS1W6htDqbB-bbEqhl-T7JlszTbGDgpdvbLJPyPQ&oe=68FA9710'],
-        ['name' => 'สินค้าแนะนำ',    'price' => 459, 'image' => 'https://scontent-bkk1-2.xx.fbcdn.net/v/t39.30808-6/554080766_701504126299049_6480003358265294630_n.jpg?stp=dst-jpg_s552x414_tt6&_nc_cat=105&ccb=1-7&_nc_sid=714c7a&_nc_ohc=BIChVpb6OSYQ7kNvwHvLBak&_nc_oc=AdlKCBOZlVWZCz4e4PLnSHGnymh2omIATkNrCpua_LKpgHwuHGQvOktncTSyV15qd2Q&_nc_zt=23&_nc_ht=scontent-bkk1-2.xx&_nc_gid=74FrOmFklq7U82q891X1eg&oh=00_Affo2FQtlj9lxx4kWCDxtK3S485aIDGRp0dlWsgWJlfm4g&oe=68FA99DB'],
+        ['name' => 'สินค้าแนะนำ',    'price' => 199, 'image' => 'https://scontent.fbkk22-8.fna.fbcdn.net/v/t39.30808-6/554086329_701499836299478_4898083085511445486_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=127cfc&_nc_ohc=vfVCbJkGLdAQ7kNvwF6M_er&_nc_oc=Adl2pzspFWDAmTvnaWvFuYylDfjRXWrc49XaJjTc8KqGutKLfLDB11DdjBxBx0UdUdWF2efTL8EvahlJU6iZ2Nmf&_nc_zt=23&_nc_ht=scontent.fbkk22-8.fna&_nc_gid=5zr7vy4WI92DxXKJof2uYQ&oh=00_Afj16imBIHmcAW-ypdO-ypcjYg4em5GKd3D_WShSaCuwZA&oe=6910A09F'],
+        ['name' => 'สินค้าแนะนำ',    'price' => 239, 'image' => 'https://scontent.fbkk22-7.fna.fbcdn.net/v/t39.30808-6/540699914_681892071593588_2577620848296378713_n.jpg?stp=dst-jpg_s1080x2048_tt6&_nc_cat=107&ccb=1-7&_nc_sid=127cfc&_nc_ohc=mShQLSsKdeoQ7kNvwHUTKYN&_nc_oc=AdmR5bpB9SPuqEa2qydgeooZdtzHoRitAY8um-Wdc9LAO9zrm1QydWoErQBTqVHDNQCmXsZKlgb-R05XGo9SI1li&_nc_zt=23&_nc_ht=scontent.fbkk22-7.fna&_nc_gid=hjRat7yIk6j1Wyopo9S_Zw&oh=00_Afhcf29joGRAtaKjvwlb0j97XwIfrDLnoHEuQ2_7q_tUkg&oe=69109C5D'],
+        ['name' => 'สินค้าแนะนำ',    'price' => 499, 'image' => 'https://scontent.fbkk22-7.fna.fbcdn.net/v/t39.30808-6/533525948_669617189487743_4878692035594660326_n.jpg?_nc_cat=107&ccb=1-7&_nc_sid=833d8c&_nc_ohc=1duWbNprhf0Q7kNvwH4chse&_nc_oc=AdntANx7vZ0V46f-PL5Jzp3k0Fb9XexfiflKJ4FfQgtKkCY51WpflrQWeiJ2MQA_ADkIQCAsWdkQSSwx5EFvkwoH&_nc_zt=23&_nc_ht=scontent.fbkk22-7.fna&_nc_gid=Fjy_or_kYi23PKR9E7zCpQ&oh=00_Afid5NRuRceA5JQKlaHnuOscH5lWe8RgurpCsLhufJTnFw&oe=6910A5FA'],
+        ['name' => 'สินค้าแนะนำ',    'price' => 459, 'image' => 'https://scontent.fbkk22-8.fna.fbcdn.net/v/t39.30808-6/532934551_668097252973070_2372766549662057794_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=833d8c&_nc_ohc=cZD1dYcMV7MQ7kNvwGwk6aD&_nc_oc=AdnoIaqG8vjvPWHul9pxPWnlZJ3NIOcOs3sVPXaFmfiktyzRZmQZTzXO6xNqtoOSDKv9ynntxjzr1eTcgexGFS-9&_nc_zt=23&_nc_ht=scontent.fbkk22-8.fna&_nc_gid=lisa9iL0NSvCFKC2P9m0ow&oh=00_Afil1z8riK0P8pycbgOmIUY8TN5MlcHTGskQzZYiSx00BQ&oe=691080EB'],
       ];
   @endphp
 
-  {{-- ====== Navbar (มินิมอล เรียบ สะอาด) ====== --}}
   <header class="sticky top-0 z-30 bg-white/80 backdrop-blur border-b border-slate-100">
     <div class="max-w-7xl mx-auto h-16 px-4 sm:px-6 lg:px-8 flex items-center justify-between">
       <a href="{{ url('/') }}" class="flex items-center gap-2 group">
@@ -58,14 +55,11 @@
         </div>
         <span class="font-semibold tracking-wide group-hover:opacity-80 transition">
           แพลตฟอร์มร้านผ้าคลุม
-          {{-- {{ config('app.name', 'แพลตฟอร์มร้านผ้าคลุม') }} --}}
         </span>
       </a>
 
       <nav class="hidden md:flex items-center gap-6 text-sm">
         <a href="#featured" class="hover:text-olive transition">สินค้าแนะนำ</a>
-        {{-- <a href="#" class="hover:text-olive transition">มาใหม่</a>
-        <a href="#" class="hover:text-olive transition">โปรโมชั่น</a> --}}
       </nav>
 
       <div class="flex items-center gap-2">
@@ -112,7 +106,7 @@
           <img
             alt="Minimal Hijab Hero"
             class="w-full h-full object-cover"
-            src="https://scontent-bkk1-1.xx.fbcdn.net/v/t39.30808-6/558058041_710047355444726_1473482335204980937_n.jpg?stp=c0.104.1290.1290a_dst-jpg_s552x414_tt6&_nc_cat=111&ccb=1-7&_nc_sid=50ad20&_nc_ohc=WjkrDLdGaQwQ7kNvwGMkXHT&_nc_oc=Adnp3pgpiXSZXXwn-AtzSjBG2Xvv4BnbLmgMrqXDkhhgvKudKhKCr5dPsEyxJ3D77tE&_nc_zt=23&_nc_ht=scontent-bkk1-1.xx&_nc_gid=Onrmbv8OPbC0SBBIgqadEg&oh=00_Afe89Wdz5z6qTcvCFUoXGIJ1SH9zF_gvJyKEa3mJYngvsw&oe=68FA77C6">
+            src="https://scontent.fbkk22-6.fna.fbcdn.net/v/t39.30808-6/572057238_728551330260995_1428492837862035333_n.jpg?stp=dst-jpg_p960x960_tt6&_nc_cat=104&ccb=1-7&_nc_sid=833d8c&_nc_ohc=kMIXjSdgdugQ7kNvwF_nk7t&_nc_oc=Adn3cvEpq_qQ53NY_ocQRqWmkP3450s8vu7uUfVLaf6DlM_FY_JkycF4rG9FHgd6v1GBJdcEACs0g4W-WXTCPbOe&_nc_zt=23&_nc_ht=scontent.fbkk22-6.fna&_nc_gid=qXXw-fMONSj4UmURMjHYSg&oh=00_AfjBTx36DqzXMTklJvrDE_gIfXv2ckoBAO6j1RPEF2ThKQ&oe=691075D0">
         </div>
       </div>
     </div>
